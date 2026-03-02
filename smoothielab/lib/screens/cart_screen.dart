@@ -14,29 +14,29 @@ class CartScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F8F8),
       appBar: AppBar(
-        title: Text(
-          'Cart  ${cart.totalCount > 0 ? "(${cart.totalCount} items)" : ""}',
-          style: const TextStyle(fontWeight: FontWeight.bold),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('My Cart',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            if (cart.totalCount > 0)
+              Text('${cart.totalCount} items',
+                  style: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 12,
+                      fontWeight: FontWeight.normal)),
+          ],
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFF8F8F8),
         elevation: 0,
       ),
       body: cart.items.isEmpty
-          ? const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('🛒', style: TextStyle(fontSize: 48)),
-                  SizedBox(height: 8),
-                  Text('ตะกร้าว่างเปล่า', style: TextStyle(color: Colors.grey)),
-                ],
-              ),
-            )
+          ? _EmptyCart()
           : Column(
               children: [
                 Expanded(
                   child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
                     itemCount: cart.items.length,
                     itemBuilder: (_, i) => _CartItemCard(index: i),
                   ),
@@ -48,39 +48,97 @@ class CartScreen extends StatelessWidget {
   }
 }
 
+// ── Empty State ───────────────────────────────────────
+class _EmptyCart extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 100, height: 100,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              shape: BoxShape.circle,
+            ),
+            child: const Center(
+              child: Text('🛒', style: TextStyle(fontSize: 44)),
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Text('Your cart is empty',
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                  color: Colors.black87)),
+          const SizedBox(height: 6),
+          const Text('Add some smoothies to get started!',
+              style: TextStyle(color: Colors.grey, fontSize: 13)),
+        ],
+      ),
+    );
+  }
+}
+
 // ── Cart Item Card ────────────────────────────────────
 class _CartItemCard extends StatelessWidget {
   final int index;
   const _CartItemCard({required this.index});
 
   Future<void> _confirmDelete(
-    BuildContext context,
-    CartProvider cart,
-    int i,
-  ) async {
+      BuildContext context, CartProvider cart, int i) async {
     final item = cart.items[i];
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('ลบรายการ?'),
-        content: Text('ต้องการลบ "${item.displayName}" ออกจากตะกร้าใช่ไหม?'),
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Column(children: [
+          Text('🗑️', style: TextStyle(fontSize: 36)),
+          SizedBox(height: 8),
+          Text('Remove Item?',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        ]),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+        content: Text(
+          'Remove "${item.displayName}" from your cart?',
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Colors.grey),
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('ยกเลิก', style: TextStyle(color: Colors.grey)),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+          Row(children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => Navigator.pop(context, false),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text('Cancel',
+                    style: TextStyle(color: Colors.grey)),
               ),
             ),
-            child: const Text('ลบ'),
-          ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red.shade400,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  elevation: 0,
+                ),
+                child: const Text('Remove',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ]),
         ],
       ),
     );
@@ -90,198 +148,231 @@ class _CartItemCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cart = context.watch<CartProvider>();
-    // guard: ถ้า index เกิน (หลังลบ) ไม่ render
     if (index >= cart.items.length) return const SizedBox.shrink();
     final item = cart.items[index];
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 3)),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Emoji
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF8F8F8),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Center(
-                  child: Text(
-                    item.smoothie.emoji,
-                    style: const TextStyle(fontSize: 28),
-                  ),
-                ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Emoji box ──────────────────────────────
+            Container(
+              width: 58, height: 58,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0FFF4),
+                borderRadius: BorderRadius.circular(16),
               ),
-              const SizedBox(width: 12),
+              child: Center(
+                child: Text(item.smoothie.emoji,
+                    style: const TextStyle(fontSize: 30)),
+              ),
+            ),
+            const SizedBox(width: 14),
 
-              // Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ชื่อ: เมนูจริง หรือ ผลไม้+ของเหลว ถ้า custom
-                    Text(
-                      item.displayName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
+            // ── Info ───────────────────────────────────
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Name + Edit button
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          item.displayName,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 15),
+                        ),
                       ),
-                    ),
-
-                    const SizedBox(height: 4),
-
-                    // Size + Sweetness
-                    Row(
-                      children: [
-                        _Tag(item.size, color: const Color(0xFF4CAF50)),
-                        const SizedBox(width: 6),
-                        _Tag(item.sweetness, color: Colors.amber.shade700),
-                      ],
-                    ),
-
-                    // Toppings (ถ้ามี)
-                    if (item.toppings.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        item.toppings
-                            .map((t) => '${t.emoji} ${t.name}')
-                            .join('  '),
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
+                      // Edit button
+                      GestureDetector(
+                        onTap: () {
+                          final nav = context.read<NavigationProvider>();
+                          Navigator.pop(context);
+                          nav.goToLabWithPreset(
+                            item.fruitIndexes,
+                            extrasIndexes: item.extrasIndexes,
+                            veggieIndexes: item.veggieIndexes,
+                            menuName: item.isCustom ? null : item.smoothie.name,
+                            menuEmoji:
+                                item.isCustom ? null : item.smoothie.emoji,
+                            editIndex: index,
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(Icons.edit_rounded,
+                              size: 15, color: Colors.grey),
                         ),
                       ),
                     ],
+                  ),
 
+                  const SizedBox(height: 6),
+
+                  // Tags: Size + Sweetness
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    children: [
+                      _Tag(item.size,
+                          icon: Icons.local_drink_rounded,
+                          color: const Color(0xFF4CAF50)),
+                      _Tag(item.sweetness,
+                          icon: Icons.water_drop_rounded,
+                          color: Colors.amber.shade700),
+                    ],
+                  ),
+
+                  // Toppings
+                  if (item.toppings.isNotEmpty) ...[
                     const SizedBox(height: 6),
-                    Text(
-                      '฿${item.itemPrice.toStringAsFixed(0)}',
-                      style: const TextStyle(
-                        color: Color(0xFF4CAF50),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                      ),
+                    Wrap(
+                      spacing: 4,
+                      runSpacing: 4,
+                      children: item.toppings
+                          .map((t) => Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 7, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade100,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  '${t.emoji} ${t.name}',
+                                  style: const TextStyle(
+                                      fontSize: 11, color: Colors.black87),
+                                ),
+                              ))
+                          .toList(),
                     ),
                   ],
-                ),
-              ),
 
-              // ปุ่มแก้ไข (กลับไป Lab)
-              IconButton(
-                onPressed: () {
-                  final nav = context.read<NavigationProvider>();
-                  Navigator.pop(context);
-                  nav.goToLabWithPreset(
-                    item.fruitIndexes,
-                    extrasIndexes: item.extrasIndexes,
-                    veggieIndexes: item.veggieIndexes,
-                    menuName: item.isCustom ? null : item.smoothie.name,
-                    menuEmoji: item.isCustom ? null : item.smoothie.emoji,
-                    editIndex: index,
-                  );
-                },
-                icon: const Icon(
-                  Icons.edit_rounded,
-                  color: Colors.grey,
-                  size: 20,
-                ),
-              ),
-            ],
-          ),
+                  const SizedBox(height: 10),
 
-          const SizedBox(height: 12),
+                  // Price + Qty controls
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '฿${item.itemPrice.toStringAsFixed(0)}',
+                        style: const TextStyle(
+                            color: Color(0xFFFF6B35),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16),
+                      ),
 
-          // Qty controls + Delete
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              // ลบ
-              GestureDetector(
-                onTap: () async {
-                  final needConfirm = cart.decrementAt(index);
-                  if (needConfirm && context.mounted) {
-                    await _confirmDelete(context, cart, index);
-                  }
-                },
-                child: Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    borderRadius: BorderRadius.circular(8),
+                      // Qty row
+                      Row(children: [
+                        _QtyButton(
+                          icon: Icons.remove,
+                          color: Colors.grey.shade200,
+                          iconColor: Colors.black87,
+                          onTap: () async {
+                            final need = cart.decrementAt(index);
+                            if (need && context.mounted) {
+                              await _confirmDelete(context, cart, index);
+                            }
+                          },
+                        ),
+                        Container(
+                          width: 36,
+                          alignment: Alignment.center,
+                          child: Text(
+                            '${item.quantity}',
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 15),
+                          ),
+                        ),
+                        _QtyButton(
+                          icon: Icons.add,
+                          color: const Color(0xFF4CAF50),
+                          iconColor: Colors.white,
+                          onTap: () => cart.incrementAt(index),
+                        ),
+                      ]),
+                    ],
                   ),
-                  child: const Icon(Icons.remove, size: 16),
-                ),
+                ],
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14),
-                child: Text(
-                  '${item.quantity}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-              // เพิ่ม
-              GestureDetector(
-                onTap: () => cart.incrementAt(index),
-                child: Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF4CAF50),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(Icons.add, size: 16, color: Colors.white),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Tag ───────────────────────────────────────────────
+class _Tag extends StatelessWidget {
+  final String label;
+  final Color color;
+  final IconData icon;
+  const _Tag(this.label, {required this.color, required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 10, color: color),
+          const SizedBox(width: 4),
+          Text(label,
+              style: TextStyle(
+                  fontSize: 11,
+                  color: color,
+                  fontWeight: FontWeight.w600)),
         ],
       ),
     );
   }
 }
 
-// ── Tag widget ────────────────────────────────────────
-class _Tag extends StatelessWidget {
-  final String label;
+// ── Qty Button ────────────────────────────────────────
+class _QtyButton extends StatelessWidget {
+  final IconData icon;
   final Color color;
-  const _Tag(this.label, {required this.color});
+  final Color iconColor;
+  final VoidCallback onTap;
+  const _QtyButton(
+      {required this.icon,
+      required this.color,
+      required this.iconColor,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 11,
-          color: color,
-          fontWeight: FontWeight.w600,
-        ),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 30, height: 30,
+        decoration: BoxDecoration(
+            color: color, borderRadius: BorderRadius.circular(8)),
+        child: Icon(icon, size: 15, color: iconColor),
       ),
     );
   }
@@ -295,77 +386,115 @@ class _SummaryPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-      decoration: const BoxDecoration(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black12,
-            blurRadius: 8,
-            offset: Offset(0, -2),
-          ),
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 16,
+              offset: const Offset(0, -4)),
         ],
       ),
       child: SafeArea(
         child: Column(
           children: [
-            _Row('Subtotal', cart.subtotal),
+            // Handle bar
+            Container(
+              width: 36, height: 4,
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
 
-            // แสดง discount tier ที่ถัดไปถ้ายังไม่ถึง
-            if (cart.discountRate == 0)
+            _PriceRow('Subtotal', cart.subtotal),
+
+            // Promo hint
+            if (cart.discountRate == 0 && cart.subtotal < 100)
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
-                  children: [
-                    const Icon(
-                      Icons.local_offer_rounded,
-                      size: 14,
-                      color: Colors.green,
-                    ),
-                    const SizedBox(width: 4),
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(children: [
+                    const Text('🎁', style: TextStyle(fontSize: 14)),
+                    const SizedBox(width: 8),
                     Text(
-                      'อีก ฿${(100 - cart.subtotal).toStringAsFixed(0)} รับส่วนลด 5%',
-                      style: const TextStyle(fontSize: 12, color: Colors.green),
+                      'Add ฿${(100 - cart.subtotal).toStringAsFixed(0)} more for 5% off!',
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.green.shade700,
+                          fontWeight: FontWeight.w500),
                     ),
-                  ],
+                  ]),
                 ),
               ),
 
-            if (cart.discount > 0)
-              _Row(cart.discountLabel, -cart.discount, color: Colors.green),
+            if (cart.discount > 0) ...[
+              const SizedBox(height: 2),
+              _PriceRow(cart.discountLabel, -cart.discount,
+                  color: Colors.green,
+                  prefix: '🎉 '),
+            ],
 
-            _Row('VAT 7%', cart.vat),
-            const Divider(height: 16),
-            _Row(
-              'TOTAL',
-              cart.total,
-              bold: true,
-              color: const Color(0xFFFF6B35),
+            _PriceRow('VAT 7%', cart.vat, color: Colors.grey),
+
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Row(children: [
+                Expanded(child: Divider(color: Colors.grey.shade200)),
+              ]),
             ),
-            const SizedBox(height: 12),
 
+            // Total
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Total',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16)),
+                Text('฿${cart.total.toStringAsFixed(0)}',
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 22,
+                        color: Color(0xFFFF6B35))),
+              ],
+            ),
+
+            const SizedBox(height: 14),
+
+            // Checkout button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const PaymentScreen()),
-                ),
+                onPressed: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const PaymentScreen())),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF6B35),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+                      borderRadius: BorderRadius.circular(16)),
+                  elevation: 0,
                 ),
-                child: Text(
-                  '💳 ชำระเงิน ฿${cart.total.toStringAsFixed(0)}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.payment_rounded, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Checkout  ฿${cart.total.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -377,12 +506,13 @@ class _SummaryPanel extends StatelessWidget {
   }
 }
 
-class _Row extends StatelessWidget {
+class _PriceRow extends StatelessWidget {
   final String label;
   final double amount;
-  final bool bold;
   final Color? color;
-  const _Row(this.label, this.amount, {this.bold = false, this.color});
+  final String prefix;
+  const _PriceRow(this.label, this.amount,
+      {this.color, this.prefix = ''});
 
   @override
   Widget build(BuildContext context) {
@@ -391,20 +521,16 @@ class _Row extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          Text('$prefix$label',
+              style: TextStyle(
+                  fontSize: 14,
+                  color: color ?? Colors.black87)),
           Text(
-            label,
+            '${amount < 0 ? '-' : ''}฿${amount.abs().toStringAsFixed(0)}',
             style: TextStyle(
-              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-              fontSize: bold ? 16 : 14,
-            ),
-          ),
-          Text(
-            '฿${amount.abs().toStringAsFixed(0)}',
-            style: TextStyle(
-              fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-              color: color,
-              fontSize: bold ? 18 : 14,
-            ),
+                fontSize: 14,
+                color: color ?? Colors.black87,
+                fontWeight: FontWeight.w500),
           ),
         ],
       ),

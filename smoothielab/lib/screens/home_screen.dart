@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/smoothie_item.dart';
-import '../providers/cart_provider.dart';
+import '../providers/navigation_provider.dart';
 import '../widgets/floating_cart_button.dart';
 
-// ── Preset recipes ────────────────────────────────────
 class _PresetRecipe {
   final String name;
   final String emoji;
@@ -12,22 +11,56 @@ class _PresetRecipe {
   final double price;
   final List<int> fruitIndexes;
   final String badge;
+  final String menuName;
+  final String menuEmoji;
+
   const _PresetRecipe({
-    required this.name, required this.emoji, required this.description,
-    required this.price, required this.fruitIndexes, required this.badge,
+    required this.name,
+    required this.emoji,
+    required this.description,
+    required this.price,
+    required this.fruitIndexes,
+    required this.badge,
+    required this.menuName,
+    required this.menuEmoji,
   });
 }
 
 const _presets = [
-  _PresetRecipe(name: 'Tropical Blast', emoji: '🌴', description: 'สไตล์แบบทรอปิคอล', price: 100, fruitIndexes: [1, 2], badge: '4 วัตถุดิบ'),
-  _PresetRecipe(name: 'Berry Dream',    emoji: '💜', description: 'หวานอมเปรี้ยว',     price: 90,  fruitIndexes: [0, 3], badge: '4 วัตถุดิบ'),
-  _PresetRecipe(name: 'Green Power',    emoji: '💚', description: 'พลังจากธรรมชาติ',  price: 100, fruitIndexes: [4, 5], badge: '5 วัตถุดิบ'),
+  _PresetRecipe(
+    name: 'Tropical Blast',
+    emoji: '🌴',
+    description: 'สไตล์แบบทรอปิคอล',
+    price: 100,
+    fruitIndexes: [1, 2],
+    badge: '4 วัตถุดิบ',
+    menuName: 'Tropical Blast',
+    menuEmoji: '🌴', // ✅
+  ),
+  _PresetRecipe(
+    name: 'Berry Dream',
+    emoji: '💜',
+    description: 'หวานอมเปรี้ยว',
+    price: 90,
+    fruitIndexes: [0, 3],
+    badge: '4 วัตถุดิบ',
+    menuName: 'Berry Dream',
+    menuEmoji: '💜', // ✅
+  ),
+  _PresetRecipe(
+    name: 'Green Power',
+    emoji: '💚',
+    description: 'พลังจากธรรมชาติ',
+    price: 100,
+    fruitIndexes: [4, 5],
+    badge: '5 วัตถุดิบ',
+    menuName: 'Green Power',
+    menuEmoji: '💚', // ✅
+  ),
 ];
 
 class HomeScreen extends StatefulWidget {
-  final void Function(List<int> fruitIndexes)? onGoToLabWithPreset;
-  const HomeScreen({super.key, this.onGoToLabWithPreset});
-
+  const HomeScreen({super.key});
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -40,6 +73,16 @@ class _HomeScreenState extends State<HomeScreen> {
     return kMenuItems.where((m) => m.category == _filter).toList();
   }
 
+  // helper ใช้ Provider แทน callback
+  // ✅ รับ SmoothieItem แทน List<int>
+  void _goToLab(SmoothieItem item) {
+    context.read<NavigationProvider>().goToLabWithPreset(
+      item.fruitIndexes,
+      menuName: item.name,
+      menuEmoji: item.emoji,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenW = MediaQuery.of(context).size.width;
@@ -49,28 +92,36 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
-            // ── AppBar ────────────────────────────────────
             SliverAppBar(
               floating: true,
               backgroundColor: const Color(0xFFF8F8F8),
               elevation: 0,
               title: RichText(
                 text: const TextSpan(
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                   children: [
                     TextSpan(text: 'Smoothie'),
-                    TextSpan(text: 'Lab', style: TextStyle(color: Color(0xFF4CAF50))),
+                    TextSpan(
+                      text: 'Lab',
+                      style: TextStyle(color: Color(0xFF4CAF50)),
+                    ),
                   ],
                 ),
               ),
               actions: const [CartIconButton()],
             ),
 
-            // ── Greeting ──────────────────────────────────
             const SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(20, 4, 20, 0),
-                child: Text('สวัสดี, ณัฐ 👋', style: TextStyle(fontSize: 14, color: Colors.grey)),
+                child: Text(
+                  'สวัสดี, พอย 👋',
+                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                ),
               ),
             ),
 
@@ -91,22 +142,55 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('// FORMULA OF THE DAY',
-                                style: TextStyle(fontSize: 11, color: Colors.green, letterSpacing: 1)),
+                            const Text(
+                              '// FORMULA OF THE DAY',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.green,
+                                letterSpacing: 1,
+                              ),
+                            ),
                             const SizedBox(height: 8),
-                            const Text('Mango', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-                            const Text('Tango', style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFF4CAF50))),
+                            const Text(
+                              'Mango',
+                              style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const Text(
+                              'Tango',
+                              style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF4CAF50),
+                              ),
+                            ),
                             const SizedBox(height: 4),
-                            const Text('mango + pineapple + lime', style: TextStyle(color: Colors.grey, fontSize: 13)),
+                            const Text(
+                              'mango + pineapple + lime',
+                              style: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 13,
+                              ),
+                            ),
                             const SizedBox(height: 12),
                             ElevatedButton.icon(
-                              onPressed: () => widget.onGoToLabWithPreset?.call([1]),
+                              onPressed: () => context
+                                  .read<NavigationProvider>()
+                                  .goToLabWithPreset(
+                                    [1],
+                                    menuName: 'Mango Tango',
+                                    menuEmoji: '🥭',
+                                  ),
                               icon: const Text('🧪'),
                               label: const Text('ดูสูตร'),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF4CAF50),
                                 foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
                               ),
                             ),
                           ],
@@ -127,8 +211,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   spacing: 8,
                   children: [
                     for (final f in [
-                      ('all', 'ALL', ''), ('berry', 'BERRY', '🍓'),
-                      ('tropical', 'TROPICAL', '🥭'), ('green', 'GREEN', '🥝'),
+                      ('all', 'ALL', ''),
+                      ('berry', 'BERRY', '🍓'),
+                      ('tropical', 'TROPICAL', '🥭'),
+                      ('green', 'GREEN', '🥝'),
                     ])
                       ChoiceChip(
                         label: Text('${f.$3} ${f.$2}'),
@@ -152,8 +238,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('สูตรยอดนิยม', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text('SEE ALL →', style: TextStyle(color: Colors.grey, fontSize: 13)),
+                    Text(
+                      'สูตรยอดนิยม',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      'SEE ALL →',
+                      style: TextStyle(color: Colors.grey, fontSize: 13),
+                    ),
                   ],
                 ),
               ),
@@ -169,7 +264,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   itemBuilder: (_, i) {
                     final p = _presets[i];
                     return GestureDetector(
-                      onTap: () => widget.onGoToLabWithPreset?.call(p.fruitIndexes),
+                      onTap: () =>
+                          context.read<NavigationProvider>().goToLabWithPreset(
+                            p.fruitIndexes,
+                            menuName: p.menuName,
+                            menuEmoji: p.menuEmoji,
+                          ),
                       child: Container(
                         width: 140,
                         margin: const EdgeInsets.only(right: 12),
@@ -177,17 +277,54 @@ class _HomeScreenState extends State<HomeScreen> {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
-                          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8, offset: const Offset(0, 2))],
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          Text(p.emoji, style: const TextStyle(fontSize: 32)),
-                          const SizedBox(height: 6),
-                          Text(p.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13), maxLines: 1, overflow: TextOverflow.ellipsis),
-                          Text(p.description, style: const TextStyle(color: Colors.grey, fontSize: 11), maxLines: 1),
-                          const SizedBox(height: 4),
-                          Text('฿${p.price.toStringAsFixed(0)}', style: const TextStyle(color: Color(0xFFFF6B35), fontWeight: FontWeight.bold, fontSize: 13)),
-                          Text(p.badge, style: const TextStyle(color: Colors.grey, fontSize: 10)),
-                        ]),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(p.emoji, style: const TextStyle(fontSize: 32)),
+                            const SizedBox(height: 6),
+                            Text(
+                              p.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            Text(
+                              p.description,
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 11,
+                              ),
+                              maxLines: 1,
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '฿${p.price.toStringAsFixed(0)}',
+                              style: const TextStyle(
+                                color: Color(0xFFFF6B35),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                              ),
+                            ),
+                            Text(
+                              p.badge,
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
@@ -199,7 +336,10 @@ class _HomeScreenState extends State<HomeScreen> {
             const SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.fromLTRB(20, 16, 20, 8),
-                child: Text('เมนูทั้งหมด', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                child: Text(
+                  'เมนูทั้งหมด',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
               ),
             ),
 
@@ -209,8 +349,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 delegate: SliverChildBuilderDelegate(
                   (ctx, i) => _MenuCard(
                     item: _filtered[i],
-                    // ✅ ส่ง callback ไปแทน bottom sheet
-                    onTap: () => widget.onGoToLabWithPreset?.call(_filtered[i].fruitIndexes),
+                    onTap: () => _goToLab(_filtered[i]),
                   ),
                   childCount: _filtered.length,
                 ),
@@ -231,7 +370,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// ── Menu Card — ไม่มี bottom sheet แล้ว ───────────────
 class _MenuCard extends StatelessWidget {
   final SmoothieItem item;
   final VoidCallback onTap;
@@ -246,26 +384,52 @@ class _MenuCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 2))],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(item.emoji, style: const TextStyle(fontSize: 40)),
             const SizedBox(height: 8),
-            Text(item.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+            Text(
+              item.name,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
             const SizedBox(height: 4),
-            Text(item.ingredients.join(' + '), style: const TextStyle(fontSize: 11, color: Colors.grey), maxLines: 2),
+            Text(
+              item.ingredients.join(' + '),
+              style: const TextStyle(fontSize: 11, color: Colors.grey),
+              maxLines: 2,
+            ),
             const Spacer(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('฿${item.basePrice.toStringAsFixed(0)}',
-                    style: const TextStyle(color: Color(0xFFFF6B35), fontWeight: FontWeight.bold)),
+                Text(
+                  '฿${item.basePrice.toStringAsFixed(0)}',
+                  style: const TextStyle(
+                    color: Color(0xFFFF6B35),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
                 Container(
-                  width: 28, height: 28,
-                  decoration: const BoxDecoration(color: Color(0xFF4CAF50), shape: BoxShape.circle),
-                  child: const Icon(Icons.arrow_forward, color: Colors.white, size: 16),
+                  width: 28,
+                  height: 28,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF4CAF50),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.arrow_forward,
+                    color: Colors.white,
+                    size: 16,
+                  ),
                 ),
               ],
             ),

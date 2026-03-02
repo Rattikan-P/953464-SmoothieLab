@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/smoothie_item.dart';
 import '../providers/cart_provider.dart';
+import '../providers/navigation_provider.dart';
 import '../widgets/floating_cart_button.dart';
 
 const _fruitsData = [
@@ -11,6 +12,12 @@ const _fruitsData = [
   ('💜', 'บลูเบอร์รี่', 18.0),
   ('🥝', 'กีวี', 15.0),
   ('🍑', 'พีช', 14.0),
+];
+
+const _veggiesData = <(String, String, double)>[
+  ('🥬', 'ผักโขม', 10.0),
+  ('🥦', 'บร็อคโคลี่', 12.0),
+  // เพิ่มได้เลยค่ะ
 ];
 
 const _extrasData = [
@@ -36,11 +43,15 @@ class LabScreen extends StatefulWidget {
 class LabScreenState extends State<LabScreen> {
   final Set<int> _fruits = {};
   final Set<int> _extras = {};
+  final Set<int> _veggies = {};
   final Set<int> _toppings = {};
 
   String _size = 'M';
   int _sweetnessIndex = 2; // หวานปกติ default
   static const double _base = 25;
+
+  String? _presetMenuName; // null = custom, มีค่า = เมนูจาก list
+  String? _presetMenuEmoji;
 
   double get _sizeMultiplier {
     switch (_size) {
@@ -53,23 +64,36 @@ class LabScreenState extends State<LabScreen> {
     }
   }
 
-  // เพิ่ม method presetFruits ให้ล้าง topping ด้วย
-  void presetFruits(List<int> indexes) {
+  void presetFruits(
+    List<int> fruitIndexes, {
+    List<int> extrasIndexes = const [],
+    List<int> veggieIndexes = const [],
+    String? menuName,
+    String? menuEmoji,
+  }) {
     setState(() {
       _fruits.clear();
-      _fruits.addAll(indexes);
+      _fruits.addAll(fruitIndexes);
+
       _extras.clear();
-      _toppings.clear(); // ✅ clear topping ด้วย
+      _extras.addAll(extrasIndexes);
+
+      _veggies.clear();
+      _veggies.addAll(veggieIndexes);
+
+      _toppings.clear();
       _size = 'M';
       _sweetnessIndex = 2;
+      _presetMenuName = menuName;
+      _presetMenuEmoji = menuEmoji;
     });
   }
 
-  // คำนวณราคารวม topping ด้วย
   double get _total {
     double t = _base;
     for (final i in _fruits) t += _fruitsData[i].$3;
     for (final i in _extras) t += _extrasData[i].$3;
+    for (final i in _veggies) t += _veggiesData[i].$3;
     for (final i in _toppings) t += kToppingItems[i].price;
     t *= _sizeMultiplier;
     return t;
@@ -78,6 +102,8 @@ class LabScreenState extends State<LabScreen> {
   @override
   Widget build(BuildContext context) {
     final cart = context.read<CartProvider>();
+    final nav = context.watch<NavigationProvider>();
+    final isEditing = nav.editingCartIndex != null;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F8F8),
@@ -375,6 +401,86 @@ class LabScreenState extends State<LabScreen> {
 
                   const SizedBox(height: 16),
 
+                  // ── Fruits ─────────────────────────────────
+                  const Text(
+                    '🥦 ผัก',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  ),
+                  const SizedBox(height: 8),
+                  LayoutBuilder(
+                    builder: (_, constraints) {
+                      final cols = constraints.maxWidth > 400 ? 3 : 3;
+                      return GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: cols,
+                          mainAxisSpacing: 8,
+                          crossAxisSpacing: 8,
+                          childAspectRatio: 1,
+                        ),
+                        itemCount: _veggiesData.length,
+                        itemBuilder: (_, i) {
+                          final d = _veggiesData[i];
+                          final sel = _veggies.contains(i);
+                          return GestureDetector(
+                            onTap: () => setState(() {
+                              if (sel)
+                                _veggies.remove(i);
+                              else
+                                _veggies.add(i);
+                            }),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              decoration: BoxDecoration(
+                                color: sel
+                                    ? const Color(0xFFE8F5E9)
+                                    : Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: sel
+                                      ? const Color(0xFF4CAF50)
+                                      : Colors.grey.shade200,
+                                  width: sel ? 2 : 1,
+                                ),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    d.$1,
+                                    style: const TextStyle(fontSize: 26),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    d.$2,
+                                    style: const TextStyle(fontSize: 11),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  Text(
+                                    '+฿${d.$3.toStringAsFixed(0)}',
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: Color(0xFFFF6B35),
+                                    ),
+                                  ),
+                                  if (sel)
+                                    const Icon(
+                                      Icons.check_circle,
+                                      color: Color(0xFF4CAF50),
+                                      size: 14,
+                                    ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 16),
+
                   // ── Extras ─────────────────────────────────
                   const Text(
                     '🥛 ของเหลว',
@@ -471,10 +577,8 @@ class LabScreenState extends State<LabScreen> {
                       );
                     }),
                   ),
-                                    const SizedBox(height: 30),
-
+                  const SizedBox(height: 30),
                 ],
-                
               ),
             ),
           ),
@@ -507,47 +611,95 @@ class LabScreenState extends State<LabScreen> {
                     ],
                   ),
                   ElevatedButton(
-                    onPressed: _fruits.isEmpty
+                    onPressed: (_fruits.isEmpty && _veggies.isEmpty)
                         ? null
                         : () {
                             final sweetness =
                                 _sweetnessLevels[_sweetnessIndex].$2;
-                            cart.addItem(
-                              SmoothieItem(
-                                name: 'My Formula',
-                                emoji: '🧪',
-                                basePrice: _total / _sizeMultiplier,
-                                ingredients: [
-                                  ..._fruits.map((i) => _fruitsData[i].$2),
-                                  ..._extras.map((i) => _extrasData[i].$2),
-                                ],
-                                category: 'green',
-                              ),
-                              size: _size,
-                              toppings: _toppings.map((i) => kToppingItems[i]).toList(),
-                              sweetness: sweetness,
+
+                            // ถ้ามาจากเมนู ใช้ชื่อและ emoji เมนูนั้น
+                            final isFromMenu = _presetMenuName != null;
+                            final itemName = _presetMenuName ?? 'My Formula';
+                            final itemEmoji = _presetMenuEmoji ?? '🧪';
+
+                            final newItem = SmoothieItem(
+                              name: itemName,
+                              emoji: itemEmoji,
+                              basePrice: _total / _sizeMultiplier,
+                              ingredients: [
+                                ..._fruits.map((i) => _fruitsData[i].$2),
+                                ..._extras.map((i) => _extrasData[i].$2),
+                                ..._veggies.map((i) => _veggiesData[i].$2),
+                              ],
+                              category: 'green',
                             );
 
-                            // ✅ เพิ่มตรงนี้ — clear ทุกอย่างหลังใส่ตะกร้า
+                            final nav = context.read<NavigationProvider>();
+
+                            if (isEditing) {
+                              cart.updateItemAt(
+                                nav.editingCartIndex!,
+                                newItem,
+                                size: _size,
+                                toppings: _toppings
+                                    .map((i) => kToppingItems[i])
+                                    .toList(),
+                                sweetness: sweetness,
+                                fruitIndexes: _fruits.toList(),
+                                extrasIndexes: _extras.toList(),
+                                veggieIndexes: _veggies.toList(),
+                                isCustom: !isFromMenu, // ✅
+                              );
+                              nav.clearEditingIndex();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('อัพเดตตะกร้าแล้ว ✅'),
+                                  backgroundColor: const Color(0xFF4CAF50),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            } else {
+                              cart.addItem(
+                                newItem,
+                                size: _size,
+                                toppings: _toppings
+                                    .map((i) => kToppingItems[i])
+                                    .toList(),
+                                sweetness: sweetness,
+                                isCustom:
+                                    !isFromMenu, // false ถ้าเป็นเมนูจาก list
+                                fruitIndexes: _fruits.toList(),
+                                extrasIndexes: _extras.toList(),
+                                veggieIndexes: _veggies.toList(),
+                              );
+                              // snackbar แสดงชื่อเมนูจริง
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'เพิ่ม $itemName แล้ว! ${isFromMenu ? itemEmoji : "🧪"}',
+                                  ),
+                                  backgroundColor: const Color(0xFF4CAF50),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            }
+
+                            // clear
                             setState(() {
                               _fruits.clear();
                               _extras.clear();
                               _toppings.clear();
+                              _veggies.clear();
                               _size = 'M';
                               _sweetnessIndex = 2;
+                              _presetMenuName = null; // ✅ reset
+                              _presetMenuEmoji = null; // ✅
                             });
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'เพิ่ม My Formula (${_size}, $sweetness) แล้ว! 🧪',
-                                ),
-                                backgroundColor: const Color(0xFF4CAF50),
-                              ),
-                            );
                           },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF4CAF50),
+                      backgroundColor: isEditing
+                          ? const Color(0xFF4CAF50)
+                          : const Color(0xFF4CAF50),
                       foregroundColor: Colors.white,
                       disabledBackgroundColor: Colors.grey.shade300,
                       padding: const EdgeInsets.symmetric(
@@ -558,9 +710,10 @@ class LabScreenState extends State<LabScreen> {
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    child: const Text(
-                      'ใส่ตะกร้า →',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                    // เปลี่ยนข้อความปุ่มตาม mode
+                    child: Text(
+                      isEditing ? 'อัพเดตตะกร้า' : 'ใส่ตะกร้า →',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],

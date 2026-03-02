@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import '../models/order_model.dart';
-import '../models/smoothie_item.dart';
-import '../providers/cart_provider.dart';
 import '../widgets/floating_cart_button.dart';
 
 class OrderHistoryScreen extends StatefulWidget {

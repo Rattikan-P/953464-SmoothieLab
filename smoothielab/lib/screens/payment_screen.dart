@@ -137,7 +137,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-                child: const Text('✅ จำลอง: ยืนยันการชำระเงิน',
+                child: const Text('ยืนยันการชำระเงิน',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ),

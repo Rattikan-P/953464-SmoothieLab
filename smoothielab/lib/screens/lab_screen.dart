@@ -1677,7 +1677,8 @@ class LabScreenState extends State<LabScreen>
                                 extrasIndexes: _extras.map((i) => i + 30).toList(),
                                 veggieIndexes: _veggies.map((i) => i + 100).toList(),
                                 herbsIndexes: _herbs.map((i) => i + 260).toList(),
-                                isCustom: !isFromMenu, // ✅
+                                isCustom: !isFromMenu,
+                                toppingsIndexes: _toppings.toList(), // ✅ เพิ่ม
                               );
                               nav.clearEditingIndex();
                               ScaffoldMessenger.of(context).showSnackBar(

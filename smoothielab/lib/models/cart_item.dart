@@ -35,7 +35,42 @@ class CartItem {
 
   String get displayName {
     if (!isCustom) return smoothie.name;
-    return smoothie.ingredients.join(' + ');
+
+    // สร้างชื่อจาก ingredients ที่เลือกจริงๆ
+    final names = <String>[];
+
+    // ผลไม้
+    for (final i in fruitIndexes) {
+      if (i >= 0 && i < kFruitsData.length) {
+        names.add(kFruitsData[i].$2);
+      }
+    }
+
+    // Extras
+    for (final i in extrasIndexes) {
+      final adjustedIndex = i - 30;
+      if (adjustedIndex >= 0 && adjustedIndex < kExtrasData.length) {
+        names.add(kExtrasData[adjustedIndex].$2);
+      }
+    }
+
+    // ผัก
+    for (final i in veggieIndexes) {
+      final adjustedIndex = i - 100;
+      if (adjustedIndex >= 0 && adjustedIndex < kVeggiesData.length) {
+        names.add(kVeggiesData[adjustedIndex].$2);
+      }
+    }
+
+    // สมุนไพร
+    for (final i in herbsIndexes) {
+      final adjustedIndex = i - 260;
+      if (adjustedIndex >= 0 && adjustedIndex < kHerbsData.length) {
+        names.add(kHerbsData[adjustedIndex].$2);
+      }
+    }
+
+    return names.isEmpty ? 'Custom Smoothie' : names.join(' + ');
   }
 
   double get itemPrice {

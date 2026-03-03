@@ -99,6 +99,7 @@ class CartProvider extends ChangeNotifier {
     required List<int> veggieIndexes,
     required List<int> herbsIndexes,
     bool isCustom = true, // ✅ เพิ่ม
+    List<int>? toppingsIndexes, // ✅ เพิ่ม
   }) {
     if (index < 0 || index >= _items.length) return;
     final oldQty = _items[index].quantity;
@@ -112,6 +113,7 @@ class CartProvider extends ChangeNotifier {
       extrasIndexes: extrasIndexes,
       veggieIndexes: veggieIndexes,
       herbsIndexes: herbsIndexes,
+      toppingsIndexes: toppingsIndexes ?? [], // ✅ เพิ่ม
       quantity: oldQty,
     );
     notifyListeners();

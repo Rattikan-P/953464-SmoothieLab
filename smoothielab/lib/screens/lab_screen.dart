@@ -448,10 +448,10 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF4CAF50) : Colors.white,
+          color: isSelected ? Colors.green : Colors.white,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? const Color(0xFF4CAF50) : Colors.grey.shade300,
+            color: isSelected ? Colors.green : Colors.grey.shade300,
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -628,54 +628,153 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
         children: [
           // ── Cup Hero Section with Formula ───────────────────
           Container(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Column(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.pink.shade50,
+                  Colors.white,
+                  Colors.green.shade50,
+                ],
+                stops: const [0.0, 0.5, 1.0],
+              ),
+            ),
+            child: Stack(
               children: [
-                // ── Cup ───────────────────────────────────
-                SizedBox(
-                  height: 200,
-                  child: Center(
-                    child: AnimatedBuilder(
-                      animation: _shakeAnimation ?? const AlwaysStoppedAnimation(0),
-                      builder: (context, child) {
-                        if (_shakeAnimation == null) return child ?? const SizedBox();
-
-                        final shakeOffset = _shakeAnimation!.value < 0.5
-                            ? _shakeAnimation!.value * 10
-                            : (1 - _shakeAnimation!.value) * 10;
-
-                        return Transform.translate(
-                          offset: Offset(shakeOffset * 0.3, shakeOffset * 0.1),
-                          child: Transform.rotate(
-                            angle: shakeOffset * 0.02,
-                            child: child,
-                          ),
-                        );
-                      },
-                      child: CustomPaint(
-                        painter: CupPainter(
-                          cupWidth: _cupDimensions.$1,
-                          cupHeight: _cupDimensions.$2,
-                          liquidColor: _blendedColor,
-                          hasIngredients: _fruits.isNotEmpty ||
-                              _extras.isNotEmpty ||
-                              _veggies.isNotEmpty,
-                          strawLength: 1.0,
-                        ),
-                        child: SizedBox(
-                          width: _cupDimensions.$1 + 40,
-                          height: _cupDimensions.$2 + 50,
-                          child: Stack(
-                            children: _buildFloatingIngredients(),
-                          ),
-                        ),
-                      ),
+                // Decorative circles
+                Positioned(
+                  top: -40,
+                  right: -30,
+                  child: Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.pink.shade700.withValues(alpha: 0.04),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 60,
+                  left: -20,
+                  child: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.green.withValues(alpha: 0.04),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 20,
+                  right: -10,
+                  child: Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.amber.shade700.withValues(alpha: 0.05),
                     ),
                   ),
                 ),
 
-                // ── Selected Ingredients Row ───────────────────
-                Container(
+                // Main content
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Column(
+                    children: [
+                      // ── Cup with decorative shadow plate ──────────
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // Decorative plate/shadow under cup
+                          Container(
+                            width: 160,
+                            height: 30,
+                            margin: const EdgeInsets.only(top: 140),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.green.withValues(alpha: 0.06),
+                                  blurRadius: 20,
+                                  spreadRadius: 3,
+                                ),
+                                BoxShadow(
+                                  color: Colors.pink.shade700.withValues(alpha: 0.04),
+                                  blurRadius: 15,
+                                  spreadRadius: 2,
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // Cup
+                          SizedBox(
+                            height: 200,
+                            child: Center(
+                              child: AnimatedBuilder(
+                                animation: _shakeAnimation ?? const AlwaysStoppedAnimation(0),
+                                builder: (context, child) {
+                                  if (_shakeAnimation == null) return child ?? const SizedBox();
+
+                                  final shakeOffset = _shakeAnimation!.value < 0.5
+                                      ? _shakeAnimation!.value * 10
+                                      : (1 - _shakeAnimation!.value) * 10;
+
+                                  return Transform.translate(
+                                    offset: Offset(shakeOffset * 0.3, shakeOffset * 0.1),
+                                    child: Transform.rotate(
+                                      angle: shakeOffset * 0.02,
+                                      child: child,
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.pink.shade700.withValues(alpha: 0.05),
+                                        blurRadius: 20,
+                                        offset: const Offset(-3, 6),
+                                      ),
+                                      BoxShadow(
+                                        color: Colors.green.withValues(alpha: 0.04),
+                                        blurRadius: 15,
+                                        offset: const Offset(3, 3),
+                                      ),
+                                    ],
+                                  ),
+                                  child: CustomPaint(
+                                    painter: CupPainter(
+                                      cupWidth: _cupDimensions.$1,
+                                      cupHeight: _cupDimensions.$2,
+                                      liquidColor: _blendedColor,
+                                      hasIngredients: _fruits.isNotEmpty ||
+                                          _extras.isNotEmpty ||
+                                          _veggies.isNotEmpty,
+                                      strawLength: 1.0,
+                                    ),
+                                    child: SizedBox(
+                                      width: _cupDimensions.$1 + 40,
+                                      height: _cupDimensions.$2 + 50,
+                                      child: Stack(
+                                        children: _buildFloatingIngredients(),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // ── Selected Ingredients Row ───────────────────
+                      Container(
                   margin: const EdgeInsets.fromLTRB(16, 10, 16, 0),
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   decoration: BoxDecoration(
@@ -731,7 +830,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                                       break;
                                     case 'veggie':
                                       chipColor = Colors.green.shade50;
-                                      textColor = Colors.green.shade700;
+                                      textColor = Colors.green;
                                       break;
                                     case 'extra':
                                       chipColor = Colors.amber.shade50;
@@ -790,7 +889,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                           style: TextStyle(
                             fontSize: 8,
                             fontWeight: FontWeight.w600,
-                            color: Colors.green.shade700,
+                            color: Colors.green,
                           ),
                         ),
                       ),
@@ -800,14 +899,17 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
               ],
             ),
           ),
+        ],
+      ),
+    ),
 
-          // ── Scrollable content ────────────────────────────
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+    // ── Scrollable content ────────────────────────────
+    Expanded(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
                   // ── Size ───────────────────────────────────
                   const Text(
                     '🥤 เลือกขนาดแก้ว',
@@ -845,7 +947,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                                   borderRadius: BorderRadius.circular(14),
                                   border: Border.all(
                                     color: sel
-                                        ? const Color(0xFF4CAF50)
+                                        ? Colors.green
                                         : Colors.grey.shade300,
                                     width: sel ? 2 : 1,
                                   ),
@@ -866,7 +968,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                                       style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: sel
-                                            ? const Color(0xFF4CAF50)
+                                            ? Colors.green
                                             : Colors.black,
                                       ),
                                     ),
@@ -929,7 +1031,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: sel
-                                    ? Colors.amber
+                                    ? Colors.amber.shade700
                                     : Colors.grey.shade300,
                                 width: sel ? 2 : 1,
                               ),
@@ -1009,7 +1111,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
                                   color: sel
-                                      ? const Color(0xFF4CAF50)
+                                      ? Colors.green
                                       : Colors.grey.shade200,
                                   width: sel ? 2 : 1,
                                 ),
@@ -1037,7 +1139,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                                   if (sel)
                                     const Icon(
                                       Icons.check_circle,
-                                      color: Color(0xFF4CAF50),
+                                      color: Colors.green,
                                       size: 14,
                                     ),
                                 ],
@@ -1096,7 +1198,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
                                   color: sel
-                                      ? const Color(0xFF4CAF50)
+                                      ? Colors.green
                                       : Colors.grey.shade200,
                                   width: sel ? 2 : 1,
                                 ),
@@ -1124,7 +1226,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                                   if (sel)
                                     const Icon(
                                       Icons.check_circle,
-                                      color: Color(0xFF4CAF50),
+                                      color: Colors.green,
                                       size: 14,
                                     ),
                                 ],
@@ -1179,7 +1281,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: sel
-                                  ? const Color(0xFF4CAF50)
+                                  ? Colors.green
                                   : Colors.grey.shade200,
                               width: sel ? 2 : 1,
                             ),
@@ -1200,7 +1302,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                               if (sel)
                                 const Icon(
                                   Icons.check_circle,
-                                  color: Color(0xFF4CAF50),
+                                  color: Colors.green,
                                   size: 14,
                                 ),
                             ],
@@ -1237,7 +1339,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
-                                color: sel ? Colors.green.shade700 : Colors.pink.shade600,
+                                color: sel ? Colors.green : Colors.pink.shade700,
                               ),
                             ),
                           ],
@@ -1250,7 +1352,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                             _toppings.add(i);
                         }),
                         selectedColor: const Color(0xFFE8F5E9),
-                        checkmarkColor: const Color(0xFF4CAF50),
+                        checkmarkColor: Colors.green,
                         labelStyle: const TextStyle(fontSize: 12),
                       );
                     }),
@@ -1306,7 +1408,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton(
-                    onPressed: (_fruits.isEmpty && _veggies.isEmpty)
+                        onPressed: (_fruits.isEmpty && _veggies.isEmpty)
                         ? null
                         : () {
                             final sweetness =
@@ -1349,7 +1451,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text('อัพเดตตะกร้าแล้ว ✅'),
-                                  backgroundColor: const Color(0xFF4CAF50),
+                                  backgroundColor: Colors.green,
                                   duration: const Duration(seconds: 2),
                                 ),
                               );
@@ -1375,7 +1477,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                                         ? 'เพิ่ม $itemName $itemEmoji แล้ว!'
                                         : 'เพิ่ม ${_selectedIngredientsOrder.map((e) => e.name).join('+')} แล้ว! 🧪',
                                   ),
-                                  backgroundColor: const Color(0xFF4CAF50),
+                                  backgroundColor: Colors.green,
                                   duration: const Duration(seconds: 2),
                                 ),
                               );
@@ -1389,40 +1491,40 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                               _veggies.clear();
                               _ingredientPositions.clear();
                               _selectedIngredientsOrder.clear();
-                              _size = 'M';
+                              _size = 'S';
                               _sweetnessIndex = 2;
                               _presetMenuName = null; // ✅ reset
                               _presetMenuEmoji = null; // ✅
                             });
                           },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isEditing
-                          ? const Color(0xFF4CAF50)
-                          : const Color(0xFF4CAF50),
-                      foregroundColor: Colors.white,
-                      disabledBackgroundColor: Colors.grey.shade300,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 14,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
-                      ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isEditing
+                        ? Colors.green
+                        : Colors.green,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: Colors.grey.shade300,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 14,
                     ),
-                    // เปลี่ยนข้อความปุ่มตาม mode
-                    child: Text(
-                      isEditing ? 'อัพเดตตะกร้า' : 'ใส่ตะกร้า →',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
                     ),
                   ),
-                ],
-              ),
-                ],
-              ),
+                  // เปลี่ยนข้อความปุ่มตาม mode
+                  child: Text(
+                    isEditing ? 'อัพเดตตะกร้า' : 'ใส่ตะกร้า →',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    );
+    ),
+    ],
+  ),
+);
   }
 }

@@ -1,17 +1,147 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import '../data/ingredients_data.dart';
 
 class SmoothieCupWidget extends StatefulWidget {
   final Color cupColor;
   final List<String> fruits;
   final double size;
 
+  /// Constructor แบบดั้งเดิม - ใส่สีและ emoji เอง
   const SmoothieCupWidget({
     super.key,
     required this.cupColor,
     required this.fruits,
     this.size = 120,
   });
+
+  /// Constructor ใหม่ - สะดวกกว่า ใส่ indexes และคำนวณสีให้เอง
+  factory SmoothieCupWidget.fromIndexes({
+    Key? key,
+    required List<int> fruitIndexes,
+    List<int> extrasIndexes = const [],
+    List<int> veggieIndexes = const [],
+    List<int> herbsIndexes = const [],
+    double size = 60,
+  }) {
+    final cupColor = _computeBlendedColor(
+      fruitIndexes: fruitIndexes,
+      extrasIndexes: extrasIndexes,
+      veggieIndexes: veggieIndexes,
+      herbsIndexes: herbsIndexes,
+    );
+
+    final fruits = _getFruitEmojis(
+      fruitIndexes: fruitIndexes,
+      extrasIndexes: extrasIndexes,
+      veggieIndexes: veggieIndexes,
+      herbsIndexes: herbsIndexes,
+    );
+
+    return SmoothieCupWidget(
+      key: key,
+      cupColor: cupColor,
+      fruits: fruits,
+      size: size,
+    );
+  }
+
+  /// คำนวณสี blend จาก ingredient indexes
+  /// indexes ที่ได้รับมามี offset อยู่แล้ว (extras=30+, veggies=100+, herbs=260+)
+  static Color _computeBlendedColor({
+    required List<int> fruitIndexes,
+    required List<int> extrasIndexes,
+    required List<int> veggieIndexes,
+    required List<int> herbsIndexes,
+  }) {
+    final allIndices = [
+      ...fruitIndexes,
+      ...extrasIndexes,
+      ...veggieIndexes,
+      ...herbsIndexes,
+    ];
+
+    if (allIndices.isEmpty) {
+      return const Color(0xFFE8F5E9);
+    }
+
+    int r = 0, g = 0, b = 0;
+    int count = 0;
+
+    for (final i in fruitIndexes) {
+      final color = kIngredientColors[i] ?? Colors.green;
+      r += color.red;
+      g += color.green;
+      b += color.blue;
+      count++;
+    }
+
+    for (final i in extrasIndexes) {
+      final color = kIngredientColors[i] ?? Colors.brown;
+      r += color.red;
+      g += color.green;
+      b += color.blue;
+      count++;
+    }
+
+    for (final i in veggieIndexes) {
+      final color = kIngredientColors[i] ?? Colors.green;
+      r += color.red;
+      g += color.green;
+      b += color.blue;
+      count++;
+    }
+
+    for (final i in herbsIndexes) {
+      final color = kIngredientColors[i] ?? Colors.green;
+      r += color.red;
+      g += color.green;
+      b += color.blue;
+      count++;
+    }
+
+    return Color.fromARGB(255, r ~/ count, g ~/ count, b ~/ count);
+  }
+
+  /// ดึง emoji จาก indexes
+  /// indexes ที่ได้รับมามี offset อยู่แล้ว (extras=30+, veggies=100+, herbs=260+)
+  static List<String> _getFruitEmojis({
+    required List<int> fruitIndexes,
+    required List<int> extrasIndexes,
+    required List<int> veggieIndexes,
+    required List<int> herbsIndexes,
+  }) {
+    final emojis = <String>[];
+
+    for (final i in fruitIndexes) {
+      if (i >= 0 && i < kFruitsData.length) {
+        emojis.add(kFruitsData[i].$1);
+      }
+    }
+
+    for (final i in extrasIndexes) {
+      final adjustedIndex = i - 30;
+      if (adjustedIndex >= 0 && adjustedIndex < kExtrasData.length) {
+        emojis.add(kExtrasData[adjustedIndex].$1);
+      }
+    }
+
+    for (final i in veggieIndexes) {
+      final adjustedIndex = i - 100;
+      if (adjustedIndex >= 0 && adjustedIndex < kVeggiesData.length) {
+        emojis.add(kVeggiesData[adjustedIndex].$1);
+      }
+    }
+
+    for (final i in herbsIndexes) {
+      final adjustedIndex = i - 260;
+      if (adjustedIndex >= 0 && adjustedIndex < kHerbsData.length) {
+        emojis.add(kHerbsData[adjustedIndex].$1);
+      }
+    }
+
+    return emojis;
+  }
 
   @override
   State<SmoothieCupWidget> createState() => _SmoothieCupWidgetState();

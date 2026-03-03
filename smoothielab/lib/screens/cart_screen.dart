@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/navigation_provider.dart';
 import '../data/ingredients_data.dart';
+import '../widgets/smoothie_cup_widget.dart';
 import 'payment_screen.dart';
 
 class CartScreen extends StatelessWidget {
@@ -195,20 +196,13 @@ class _CartItemCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Emoji box ──────────────────────────────
-            Container(
-              width: 58,
-              height: 58,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF0FFF4),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Center(
-                child: Text(
-                  item.smoothie.emoji,
-                  style: const TextStyle(fontSize: 30),
-                ),
-              ),
+            // ── Mixed Smoothie Glass ──────────────────────
+            SmoothieCupWidget.fromIndexes(
+              fruitIndexes: item.fruitIndexes,
+              extrasIndexes: item.extrasIndexes,
+              veggieIndexes: item.veggieIndexes,
+              herbsIndexes: item.herbsIndexes,
+              size: 58,
             ),
             const SizedBox(width: 14),
 

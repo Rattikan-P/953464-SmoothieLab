@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../models/order_model.dart';
+import '../widgets/smoothie_cup_widget.dart';
 
 class TrackOrderScreen extends StatefulWidget {
   final String orderId;
@@ -427,23 +428,12 @@ class _TrackOrderScreenState extends State<TrackOrderScreen>
                                 children: [
                                   Row(
                                     children: [
-                                      Container(
-                                        width: 48,
-                                        height: 48,
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFF0FFF4),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            item.menuEmoji,
-                                            style: const TextStyle(
-                                              fontSize: 24,
-                                            ),
-                                          ),
-                                        ),
+                                      SmoothieCupWidget.fromIndexes(
+                                        fruitIndexes: item.fruitIndexes,
+                                        extrasIndexes: item.extrasIndexes,
+                                        veggieIndexes: item.veggieIndexes,
+                                        herbsIndexes: item.herbsIndexes,
+                                        size: 48,
                                       ),
                                       const SizedBox(width: 12),
                                       Expanded(

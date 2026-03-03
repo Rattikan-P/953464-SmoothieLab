@@ -283,6 +283,9 @@ class LabScreenState extends State<LabScreen>
     final pendingExtras = nav.pendingExtras;
     final pendingVeggies = nav.pendingVeggies;
     final pendingHerbs = nav.pendingHerbs;
+    final pendingToppings = nav.pendingToppings;
+    final pendingSize = nav.pendingSize;
+    final pendingSweetness = nav.pendingSweetness;
 
     if (pendingFruits != null ||
         pendingExtras != null ||
@@ -293,8 +296,11 @@ class LabScreenState extends State<LabScreen>
         extrasIndexes: pendingExtras ?? [],
         veggieIndexes: pendingVeggies ?? [],
         herbsIndexes: pendingHerbs ?? [],
+        toppingsIndexes: pendingToppings ?? [],
         menuName: nav.pendingMenuName,
         menuEmoji: nav.pendingMenuEmoji,
+        size: pendingSize ?? 'S',
+        sweetness: pendingSweetness ?? 'หวานปกติ',
       );
       nav.clearPendingPreset();
     }

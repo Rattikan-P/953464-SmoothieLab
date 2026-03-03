@@ -7,6 +7,7 @@ import '../models/smoothie_item.dart';
 import '../data/ingredients_data.dart';
 import '../providers/cart_provider.dart';
 import '../widgets/floating_cart_button.dart';
+import '../widgets/smoothie_cup_widget.dart';
 import 'track_order_screen.dart';
 
 class OrderHistoryScreen extends StatefulWidget {
@@ -609,19 +610,12 @@ class _OrderCard extends StatelessWidget {
                       padding: const EdgeInsets.only(bottom: 10),
                       child: Row(
                         children: [
-                          Container(
-                            width: 42,
-                            height: 42,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF0FFF4),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Center(
-                              child: Text(
-                                item.menuEmoji,
-                                style: const TextStyle(fontSize: 22),
-                              ),
-                            ),
+                          SmoothieCupWidget.fromIndexes(
+                            fruitIndexes: item.fruitIndexes,
+                            extrasIndexes: item.extrasIndexes,
+                            veggieIndexes: item.veggieIndexes,
+                            herbsIndexes: item.herbsIndexes,
+                            size: 42,
                           ),
                           const SizedBox(width: 10),
                           Expanded(

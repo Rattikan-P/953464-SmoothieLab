@@ -1,3 +1,5 @@
+// models/smoothie_item.dart
+
 class SmoothieItem {
   final String name;
   final String emoji;
@@ -27,30 +29,20 @@ class ToppingItem {
   });
 }
 
-// fruitIndexes อ้างอิงตาม _fruitsData ใน LabScreen:
-// 0=สตรอว์เบอร์รี่, 1=มะม่วง, 2=กล้วย, 3=บลูเบอร์รี่, 4=กีวี, 5=พีช
 const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Berry Blast',
     emoji: '🍓',
     basePrice: 55,
-    ingredients: ['สตรอว์เบอร์รี่', 'บลูเบอร์รี่'],
+    ingredients: ['Strawberry', 'Blueberry'],
     category: 'berry',
     fruitIndexes: [0, 3],
-  ),
-  SmoothieItem(
-    name: 'Green Go',
-    emoji: '🥝',
-    basePrice: 60,
-    ingredients: ['กีวี', 'แตงกวา'],
-    category: 'green',
-    fruitIndexes: [4],
   ),
   SmoothieItem(
     name: 'Mango Tango',
     emoji: '🥭',
     basePrice: 55,
-    ingredients: ['มะม่วง', 'สับปะรด', 'มะนาว'],
+    ingredients: ['Mango', 'Pineapple', 'Lime'],
     category: 'tropical',
     fruitIndexes: [1],
   ),
@@ -58,7 +50,7 @@ const List<SmoothieItem> kMenuItems = [
     name: 'Peach Fuzz',
     emoji: '🍑',
     basePrice: 58,
-    ingredients: ['พีช', 'แอปริคอท'],
+    ingredients: ['Peach', 'Apricot', 'Honey'],
     category: 'berry',
     fruitIndexes: [5],
   ),
@@ -66,15 +58,39 @@ const List<SmoothieItem> kMenuItems = [
     name: 'Banana Boost',
     emoji: '🍌',
     basePrice: 50,
-    ingredients: ['กล้วย', 'นม'],
+    ingredients: ['Banana', 'Milk', 'Oat'],
     category: 'tropical',
     fruitIndexes: [2],
+  ),
+  SmoothieItem(
+    name: 'Watermelon Wave',
+    emoji: '🍉',
+    basePrice: 52,
+    ingredients: ['Watermelon', 'Mint', 'Lime'],
+    category: 'berry',
+    fruitIndexes: [6],
+  ),
+  SmoothieItem(
+    name: 'Detox Green',
+    emoji: '🥒',
+    basePrice: 68,
+    ingredients: ['Celery', 'Cucumber', 'Kiwi', 'Lemon'],
+    category: 'green',
+    fruitIndexes: [4],
+  ),
+  SmoothieItem(
+    name: 'Green Go',
+    emoji: '🥝',
+    basePrice: 60,
+    ingredients: ['Kiwi', 'Cucumber'],
+    category: 'green',
+    fruitIndexes: [4],
   ),
   SmoothieItem(
     name: 'Choco Dream',
     emoji: '🍫',
     basePrice: 65,
-    ingredients: ['ช็อกโกแลต', 'โกโก้', 'นม'],
+    ingredients: ['Chocolate', 'Cocoa', 'Milk'],
     category: 'green',
     fruitIndexes: [],
   ),
@@ -82,15 +98,15 @@ const List<SmoothieItem> kMenuItems = [
     name: 'Tropical Blast',
     emoji: '🌴',
     basePrice: 62,
-    ingredients: ['สับปะรด', 'มะม่วง', 'ส้ม'],
+    ingredients: ['Pineapple', 'Mango', 'Orange'],
     category: 'tropical',
-    fruitIndexes: [1, 2],
+    fruitIndexes: [1],
   ),
   SmoothieItem(
     name: 'Berry Dream',
     emoji: '💜',
     basePrice: 60,
-    ingredients: ['บลูเบอร์รี่', 'ราสพ์เบอร์รี่'],
+    ingredients: ['Blueberry', 'Raspberry'],
     category: 'berry',
     fruitIndexes: [0, 3],
   ),
@@ -98,21 +114,21 @@ const List<SmoothieItem> kMenuItems = [
     name: 'Green Power',
     emoji: '💚',
     basePrice: 65,
-    ingredients: ['ผักโขม', 'แอปเปิ้ล', 'ขิง', 'มะนาว'],
+    ingredients: ['Spinach', 'Apple', 'Ginger', 'Lime'],
     category: 'green',
-    fruitIndexes: [4, 5],
+    fruitIndexes: [4],
   ),
 ];
 
 const List<ToppingItem> kToppingItems = [
   ToppingItem(name: 'Yogurt', emoji: '🥛', price: 15),
   ToppingItem(name: 'Jelly', emoji: '🍮', price: 10),
-  ToppingItem(name: 'Boba', emoji: '⚫', price: 15),
+  ToppingItem(name: 'Tapioca Pearl', emoji: '⚫', price: 15),
   ToppingItem(name: 'Whipped Cream', emoji: '🍦', price: 15),
   ToppingItem(name: 'Chia Seeds', emoji: '🌱', price: 12),
   ToppingItem(name: 'Granola', emoji: '🌾', price: 12),
   ToppingItem(name: 'Honey', emoji: '🍯', price: 10),
-  ToppingItem(name: 'Almonds', emoji: '🥜', price: 15),
+  ToppingItem(name: 'Almond', emoji: '🥜', price: 15),
 ];
 
 const Map<String, double> kSizeMultiplier = {'S': 1.0, 'M': 1.3, 'L': 1.6};

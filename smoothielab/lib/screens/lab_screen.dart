@@ -216,6 +216,21 @@ class _IngredientPosition {
   });
 }
 
+// ข้อมูลวัตถุดิบที่เลือก (เก็บลำดับการเลือก)
+class _SelectedIngredient {
+  final String emoji;
+  final String name;
+  final double price;
+  final String type; // 'fruit', 'veggie', 'extra'
+
+  _SelectedIngredient({
+    required this.emoji,
+    required this.name,
+    required this.price,
+    required this.type,
+  });
+}
+
 class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixin {
   final Set<int> _fruits = {};
   final Set<int> _extras = {};
@@ -224,6 +239,9 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
 
   // เก็บตำแหน่งของวัตถุดิบที่ลอยในแก้ว
   final List<_IngredientPosition> _ingredientPositions = [];
+
+  // เก็บลำดับของวัตถุดิบที่เลือก (ตามลำดับที่เลือกจริง)
+  final List<_SelectedIngredient> _selectedIngredientsOrder = [];
 
   // Animation controller สำหรับ shake effect
   late AnimationController _shakeController;
@@ -279,14 +297,25 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
     String? menuEmoji,
   }) {
     setState(() {
+      _selectedIngredientsOrder.clear();
+
       _fruits.clear();
       _fruits.addAll(fruitIndexes);
+      for (final i in fruitIndexes) {
+        _addIngredientToOrder('fruit', i, kFruitsData);
+      }
 
       _extras.clear();
       _extras.addAll(extrasIndexes);
+      for (final i in extrasIndexes) {
+        _addIngredientToOrder('extra', i, kExtrasData);
+      }
 
       _veggies.clear();
       _veggies.addAll(veggieIndexes);
+      for (final i in veggieIndexes) {
+        _addIngredientToOrder('veggie', i, kVeggiesData);
+      }
 
       _toppings.clear();
       _size = 'S';
@@ -309,16 +338,59 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
       _presetMenuName = null;
       _presetMenuEmoji = null;
       _ingredientPositions.clear();
+      _selectedIngredientsOrder.clear();
     });
+  }
+
+  // Helper method to add ingredient to order list
+  void _addIngredientToOrder(String type, int index, List<(String, String, double)> dataList) {
+    final data = dataList[index];
+    _selectedIngredientsOrder.add(_SelectedIngredient(
+      emoji: data.$1,
+      name: data.$2,
+      price: data.$3,
+      type: type,
+    ));
+  }
+
+  // Helper method to remove ingredient from order list
+  void _removeIngredientFromOrder(String type, int index) {
+    // Get the data for this ingredient
+    List<(String, String, double)> dataList;
+    switch (type) {
+      case 'fruit':
+        dataList = kFruitsData;
+        break;
+      case 'veggie':
+        dataList = kVeggiesData;
+        break;
+      case 'extra':
+        dataList = kExtrasData;
+        break;
+      default:
+        return;
+    }
+
+    final data = dataList[index];
+
+    // Find and remove the first matching item from the order list
+    // (removes from the end to handle duplicates correctly)
+    for (int i = _selectedIngredientsOrder.length - 1; i >= 0; i--) {
+      final item = _selectedIngredientsOrder[i];
+      if (item.type == type &&
+          item.emoji == data.$1 &&
+          item.name == data.$2 &&
+          item.price == data.$3) {
+        _selectedIngredientsOrder.removeAt(i);
+        break;
+      }
+    }
   }
 
   // อัปเดตตำแหน่งวัตถุดิบเมื่อมีการเปลี่ยนแปลง
   void _updateIngredientPositions({bool forceRecalculate = false}) {
-    final allEmojis = [
-      ..._fruits.map((i) => kFruitsData[i].$1),
-      ..._extras.map((i) => kExtrasData[i].$1),
-      ..._veggies.map((i) => kVeggiesData[i].$1),
-    ];
+    // ใช้ลำดับการเลือกจริงจาก _selectedIngredientsOrder
+    final allEmojis = _selectedIngredientsOrder.map((item) => item.emoji).toList();
 
     final cupW = _cupDimensions.$1;
     final cupH = _cupDimensions.$2;
@@ -554,92 +626,178 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
       ),
       body: Column(
         children: [
-          // ── Formula preview ───────────────────────────────
+          // ── Cup Hero Section with Formula ───────────────────
           Container(
-            margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Column(
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        '// YOUR FORMULA',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.grey,
-                          letterSpacing: 1,
+                // ── Cup ───────────────────────────────────
+                SizedBox(
+                  height: 200,
+                  child: Center(
+                    child: AnimatedBuilder(
+                      animation: _shakeAnimation ?? const AlwaysStoppedAnimation(0),
+                      builder: (context, child) {
+                        if (_shakeAnimation == null) return child ?? const SizedBox();
+
+                        final shakeOffset = _shakeAnimation!.value < 0.5
+                            ? _shakeAnimation!.value * 10
+                            : (1 - _shakeAnimation!.value) * 10;
+
+                        return Transform.translate(
+                          offset: Offset(shakeOffset * 0.3, shakeOffset * 0.1),
+                          child: Transform.rotate(
+                            angle: shakeOffset * 0.02,
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: CustomPaint(
+                        painter: CupPainter(
+                          cupWidth: _cupDimensions.$1,
+                          cupHeight: _cupDimensions.$2,
+                          liquidColor: _blendedColor,
+                          hasIngredients: _fruits.isNotEmpty ||
+                              _extras.isNotEmpty ||
+                              _veggies.isNotEmpty,
+                          strawLength: 1.0,
+                        ),
+                        child: SizedBox(
+                          width: _cupDimensions.$1 + 40,
+                          height: _cupDimensions.$2 + 50,
+                          child: Stack(
+                            children: _buildFloatingIngredients(),
+                          ),
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _fruits.isEmpty
-                            ? '—'
-                            : _fruits.map((i) => kFruitsData[i].$2).join(' + '),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+
+                // ── Selected Ingredients Row ───────────────────
+                Container(
+                  margin: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.green.shade50,
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
                       ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
                       Text(
-                        'เลือก ${_fruits.length + _extras.length} วัตถุดิบ',
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
+                        'Your Formula',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey.shade700,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              if (_selectedIngredientsOrder.isEmpty)
+                                Text(
+                                  'ยังไม่ได้เลือก',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: Colors.grey.shade400,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                )
+                              else ...[
+                                ..._selectedIngredientsOrder.map((item) {
+                                  Color chipColor;
+                                  Color textColor;
+
+                                  switch (item.type) {
+                                    case 'fruit':
+                                      chipColor = Colors.pink.shade50;
+                                      textColor = Colors.pink.shade700;
+                                      break;
+                                    case 'veggie':
+                                      chipColor = Colors.green.shade50;
+                                      textColor = Colors.green.shade700;
+                                      break;
+                                    case 'extra':
+                                      chipColor = Colors.amber.shade50;
+                                      textColor = Colors.amber.shade700;
+                                      break;
+                                    default:
+                                      chipColor = Colors.grey.shade50;
+                                      textColor = Colors.grey.shade700;
+                                  }
+
+                                  return Container(
+                                    margin: const EdgeInsets.only(right: 5),
+                                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: chipColor,
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: textColor.withValues(alpha: 0.2),
+                                        width: 0.8,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          item.emoji,
+                                          style: const TextStyle(fontSize: 9),
+                                        ),
+                                        const SizedBox(width: 2),
+                                        Text(
+                                          item.name,
+                                          style: TextStyle(
+                                            fontSize: 8,
+                                            color: textColor,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.green.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '${_selectedIngredientsOrder.length}',
+                          style: TextStyle(
+                            fontSize: 8,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.green.shade700,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
               ],
-            ),
-          ),
-
-          // ── Cup Hero Section ──────────────────────────────
-          SizedBox(
-            height: 260,
-            child: Center(
-              child: AnimatedBuilder(
-                animation: _shakeAnimation ?? const AlwaysStoppedAnimation(0),
-                builder: (context, child) {
-                  if (_shakeAnimation == null) return child ?? const SizedBox();
-
-                  final shakeOffset = _shakeAnimation!.value < 0.5
-                      ? _shakeAnimation!.value * 10
-                      : (1 - _shakeAnimation!.value) * 10;
-
-                  return Transform.translate(
-                    offset: Offset(shakeOffset * 0.3, shakeOffset * 0.1),
-                    child: Transform.rotate(
-                      angle: shakeOffset * 0.02,
-                      child: child,
-                    ),
-                  );
-                },
-                child: CustomPaint(
-                  painter: CupPainter(
-                    cupWidth: _cupDimensions.$1,
-                    cupHeight: _cupDimensions.$2,
-                    liquidColor: _blendedColor,
-                    hasIngredients: _fruits.isNotEmpty ||
-                        _extras.isNotEmpty ||
-                        _veggies.isNotEmpty,
-                    strawLength: 1.0,
-                  ),
-                  child: SizedBox(
-                    width: _cupDimensions.$1 + 40,
-                    height: _cupDimensions.$2 + 50,
-                    child: Stack(
-                      children: _buildFloatingIngredients(),
-                    ),
-                  ),
-                ),
-              ),
             ),
           ),
 
@@ -832,8 +990,10 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                             onTap: () {
                               if (sel) {
                                 _fruits.remove(i);
+                                _removeIngredientFromOrder('fruit', i);
                               } else {
                                 _fruits.add(i);
+                                _addIngredientToOrder('fruit', i, kFruitsData);
                                 _shakeCup();
                               }
                               setState(() {
@@ -917,8 +1077,10 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                             onTap: () {
                               if (sel) {
                                 _veggies.remove(i);
+                                _removeIngredientFromOrder('veggie', i);
                               } else {
                                 _veggies.add(i);
+                                _addIngredientToOrder('veggie', i, kVeggiesData);
                                 _shakeCup();
                               }
                               setState(() {
@@ -1000,8 +1162,10 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                         onTap: () {
                           if (sel) {
                             _extras.remove(i);
+                            _removeIngredientFromOrder('extra', i);
                           } else {
                             _extras.add(i);
+                            _addIngredientToOrder('extra', i, kExtrasData);
                             _shakeCup();
                           }
                           setState(() {
@@ -1061,8 +1225,22 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                       final t = kToppingItems[i];
                       final sel = _toppings.contains(i);
                       return FilterChip(
-                        label: Text(
-                          '${t.emoji} ${t.name}\n+฿${t.price.toStringAsFixed(0)}',
+                        label: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(t.emoji),
+                            const SizedBox(width: 4),
+                            Text(t.name),
+                            const SizedBox(width: 6),
+                            Text(
+                              '+฿${t.price.toStringAsFixed(0)}',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: sel ? Colors.green.shade700 : Colors.pink.shade600,
+                              ),
+                            ),
+                          ],
                         ),
                         selected: sel,
                         onSelected: (_) => setState(() {
@@ -1193,7 +1371,9 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    'เพิ่ม $itemName แล้ว! ${isFromMenu ? itemEmoji : "🧪"}',
+                                    isFromMenu
+                                        ? 'เพิ่ม $itemName $itemEmoji แล้ว!'
+                                        : 'เพิ่ม ${_selectedIngredientsOrder.map((e) => e.name).join('+')} แล้ว! 🧪',
                                   ),
                                   backgroundColor: const Color(0xFF4CAF50),
                                   duration: const Duration(seconds: 2),
@@ -1207,6 +1387,8 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                               _extras.clear();
                               _toppings.clear();
                               _veggies.clear();
+                              _ingredientPositions.clear();
+                              _selectedIngredientsOrder.clear();
                               _size = 'M';
                               _sweetnessIndex = 2;
                               _presetMenuName = null; // ✅ reset

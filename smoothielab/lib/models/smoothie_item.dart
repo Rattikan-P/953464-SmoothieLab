@@ -105,14 +105,14 @@ const List<SmoothieItem> kMenuItems = [
 ];
 
 const List<ToppingItem> kToppingItems = [
-  ToppingItem(name: 'โยเกิร์ต', emoji: '🥛', price: 15),
-  ToppingItem(name: 'เจลลี่', emoji: '🍮', price: 10),
-  ToppingItem(name: 'ไข่มุก', emoji: '⚫', price: 15),
-  ToppingItem(name: 'วิปครีม', emoji: '🍦', price: 15),
-  ToppingItem(name: 'เมล็ดเชีย', emoji: '🌱', price: 12),
-  ToppingItem(name: 'กราโนล่า', emoji: '🌾', price: 12),
-  ToppingItem(name: 'น้ำผึ้ง', emoji: '🍯', price: 10),
-  ToppingItem(name: 'ถั่วอัลมอนด์', emoji: '🥜', price: 15),
+  ToppingItem(name: 'Yogurt', emoji: '🥛', price: 15),
+  ToppingItem(name: 'Jelly', emoji: '🍮', price: 10),
+  ToppingItem(name: 'Boba', emoji: '⚫', price: 15),
+  ToppingItem(name: 'Whipped Cream', emoji: '🍦', price: 15),
+  ToppingItem(name: 'Chia Seeds', emoji: '🌱', price: 12),
+  ToppingItem(name: 'Granola', emoji: '🌾', price: 12),
+  ToppingItem(name: 'Honey', emoji: '🍯', price: 10),
+  ToppingItem(name: 'Almonds', emoji: '🥜', price: 15),
 ];
 
 const Map<String, double> kSizeMultiplier = {'S': 1.0, 'M': 1.3, 'L': 1.6};

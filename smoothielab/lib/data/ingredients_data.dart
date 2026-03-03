@@ -20,33 +20,33 @@ const Map<int, Color> kIngredientColors = {
 
 /// ผลไม้ที่เลือกได้
 const List<(String emoji, String name, double price)> kFruitsData = [
-  ('🍓', 'สตรอว์เบอร์รี่', 15.0),
-  ('🥭', 'มะม่วง', 12.0),
-  ('🍌', 'กล้วย', 8.0),
-  ('💜', 'บลูเบอร์รี่', 18.0),
-  ('🥝', 'กีวี', 15.0),
-  ('🍑', 'พีช', 14.0),
+  ('🍓', 'Strawberry', 15.0),
+  ('🥭', 'Mango', 12.0),
+  ('🍌', 'Banana', 8.0),
+  ('💜', 'Blueberry', 18.0),
+  ('🥝', 'Kiwi', 15.0),
+  ('🍑', 'Peach', 14.0),
 ];
 
 /// ผักที่เลือกได้
 const List<(String emoji, String name, double price)> kVeggiesData = [
-  ('🥬', 'ผักโขม', 10.0),
-  ('🥦', 'บร็อคโคลี่', 12.0),
+  ('🥬', 'Kale', 10.0),
+  ('🥦', 'Broccoli', 12.0),
   // เพิ่มได้เลยค่ะ
 ];
 
 /// พวกนม/ของเหลวเพิ่มเติม
 const List<(String emoji, String name, double price)> kExtrasData = [
-  ('🥛', 'นม', 10.0),
-  ('🥥', 'กะทิ', 12.0),
-  ('🧃', 'น้ำผลไม้', 8.0),
+  ('🥛', 'Milk', 10.0),
+  ('🥥', 'Coconut', 12.0),
+  ('🧃', 'Juice', 8.0),
 ];
 
 /// ระดับความหวาน
 const List<(String emoji, String name)> kSweetnessLevels = [
-  ('🚫', 'ไม่หวาน'),
-  ('🌿', 'หวานน้อย'),
-  ('😊', 'หวานปกติ'),
-  ('🍓', 'หวานมาก'),
-  ('🤩', 'หวาสุด'),
+  ('🚫', 'No sugar'),
+  ('🌿', 'Less sugar'),
+  ('😊', 'Normal'),
+  ('🍓', 'Sweet'),
+  ('🤩', 'Extra sweet'),
 ];

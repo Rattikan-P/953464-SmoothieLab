@@ -811,7 +811,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                             children: [
                               if (_selectedIngredientsOrder.isEmpty)
                                 Text(
-                                  'ยังไม่ได้เลือก',
+                                  'Not selected',
                                   style: TextStyle(
                                     fontSize: 10,
                                     color: Colors.grey.shade400,
@@ -912,7 +912,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
           children: [
                   // ── Size ───────────────────────────────────
                   const Text(
-                    '🥤 เลือกขนาดแก้ว',
+                    '🥤 Select Size',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                   ),
                   const SizedBox(height: 8),
@@ -922,9 +922,9 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                         children: ['S', 'M', 'L'].map((s) {
                           final sel = _size == s;
                           final labels = {
-                            'S': ('เล็ก', '350 ml'),
-                            'M': ('กลาง', '500 ml'),
-                            'L': ('ใหญ่', '700 ml'),
+                            'S': ('Small', '350 ml'),
+                            'M': ('Medium', '500 ml'),
+                            'L': ('Large', '700 ml'),
                           };
                           return Expanded(
                             child: GestureDetector(
@@ -1011,7 +1011,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
 
                   // ── Sweetness ──────────────────────────────
                   const Text(
-                    '🍭 ระดับความหวาน',
+                    '🍭 Sweetness',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                   ),
                   const SizedBox(height: 8),
@@ -1068,7 +1068,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
 
                   // ── Fruits ─────────────────────────────────
                   const Text(
-                    '🍓 ผลไม้',
+                    '🍓 Fruits',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                   ),
                   const SizedBox(height: 8),
@@ -1155,7 +1155,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
 
                   // ── Fruits ─────────────────────────────────
                   const Text(
-                    '🥦 ผัก',
+                    '🥦 Vegetables',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                   ),
                   const SizedBox(height: 8),
@@ -1242,7 +1242,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
 
                   // ── Extras ─────────────────────────────────
                   const Text(
-                    '🥛 ของเหลว',
+                    '🥛 Extras',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                   ),
                   const SizedBox(height: 8),
@@ -1316,7 +1316,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
 
                   // ── Toppings ───────────────────────────────────────
                   const Text(
-                    '🍓 ท้อปปิ้ง',
+                    '🍓 Toppings',
                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                   ),
                   const SizedBox(height: 8),
@@ -1389,7 +1389,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                         ),
                       ),
                       Text(
-                        '${_fruits.length + _extras.length + _veggies.length} รายการ • ไซส์ $_size',
+                        '${_fruits.length + _extras.length + _veggies.length} items • Size $_size',
                         style: const TextStyle(
                           color: Colors.grey,
                           fontSize: 11,
@@ -1399,12 +1399,12 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                   ),
                   Row(
                     children: [
-                      // ปุ่มถังขยะ
+                      // Clear button
                       IconButton(
                         onPressed: _resetSelection,
                         icon: const Icon(Icons.delete_outline),
                         color: Colors.grey.shade600,
-                        tooltip: 'ล้างทั้งหมด',
+                        tooltip: 'Clear all',
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton(
@@ -1450,7 +1450,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                               nav.clearEditingIndex();
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('อัพเดตตะกร้าแล้ว ✅'),
+                                  content: Text('Cart updated ✅'),
                                   backgroundColor: Colors.green,
                                   duration: const Duration(seconds: 2),
                                 ),
@@ -1474,8 +1474,8 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                                 SnackBar(
                                   content: Text(
                                     isFromMenu
-                                        ? 'เพิ่ม $itemName $itemEmoji แล้ว!'
-                                        : 'เพิ่ม ${_selectedIngredientsOrder.map((e) => e.name).join('+')} แล้ว! 🧪',
+                                        ? 'Added $itemName $itemEmoji!'
+                                        : 'Added ${_selectedIngredientsOrder.map((e) => e.name).join('+')}! 🧪',
                                   ),
                                   backgroundColor: Colors.green,
                                   duration: const Duration(seconds: 2),
@@ -1511,9 +1511,9 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                       borderRadius: BorderRadius.circular(30),
                     ),
                   ),
-                  // เปลี่ยนข้อความปุ่มตาม mode
+                  // Change button text based on mode
                   child: Text(
-                    isEditing ? 'อัพเดตตะกร้า' : 'ใส่ตะกร้า →',
+                    isEditing ? 'Update Cart' : 'Add to Cart →',
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),

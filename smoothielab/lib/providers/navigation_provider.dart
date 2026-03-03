@@ -14,8 +14,8 @@ class NavigationProvider extends ChangeNotifier {
   String? _pendingSize;
   String? _pendingSweetness;
 
-  List<int>? get pendingFruits  => _pendingFruits;
-  List<int>? get pendingExtras  => _pendingExtras;
+  List<int>? get pendingFruits => _pendingFruits;
+  List<int>? get pendingExtras => _pendingExtras;
   List<int>? get pendingVeggies => _pendingVeggies;
   List<int>? get pendingHerbs   => _pendingHerbs;
   List<int>? get pendingToppings => _pendingToppings;

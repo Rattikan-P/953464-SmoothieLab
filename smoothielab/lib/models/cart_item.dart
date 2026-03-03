@@ -24,11 +24,11 @@ class CartItem {
     List<int>? extrasIndexes,
     List<int>? veggieIndexes,
     List<int>? herbsIndexes,
-  })  : toppings = toppings ?? [],
-        fruitIndexes = fruitIndexes ?? [],
-        extrasIndexes = extrasIndexes ?? [],
-        veggieIndexes = veggieIndexes ?? [],
-        herbsIndexes = herbsIndexes ?? [];
+  }) : toppings = toppings ?? [],
+       fruitIndexes = fruitIndexes ?? [],
+       extrasIndexes = extrasIndexes ?? [],
+       veggieIndexes = veggieIndexes ?? [],
+       herbsIndexes = herbsIndexes ?? [];
 
   String get displayName {
     if (!isCustom) return smoothie.name;

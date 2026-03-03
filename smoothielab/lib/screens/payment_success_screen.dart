@@ -85,6 +85,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
         ..size = item.size
         ..toppings = item.toppings.map((t) => t.name).toList()
         ..totalPrice = (item.itemPrice / cart.subtotal) * cart.total
+        ..itemPriceRaw = item.itemPrice
         ..orderDate = DateTime.now()
         ..status = 'processing'
         ..subtotal = cart.subtotal

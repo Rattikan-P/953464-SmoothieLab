@@ -8,7 +8,6 @@ import '../widgets/floating_cart_button.dart';
 import '../data/ingredients_data.dart';
 import '../widgets/smoothie_cup_widget.dart';
 
-
 class LabScreen extends StatefulWidget {
   const LabScreen({super.key});
   @override
@@ -48,12 +47,10 @@ class _FloatingIngredientState extends State<_FloatingIngredient>
       vsync: this,
     );
 
-    _floatAnimation = Tween<double>(begin: -3, end: 3).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOut,
-      ),
-    );
+    _floatAnimation = Tween<double>(
+      begin: -3,
+      end: 3,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     // เริ่ม animation หลังจาก delay
     Future.delayed(Duration(milliseconds: widget.floatDelay), () {
@@ -76,18 +73,12 @@ class _FloatingIngredientState extends State<_FloatingIngredient>
       builder: (context, child) {
         return Transform.translate(
           offset: Offset(0, _floatAnimation.value),
-          child: Transform.rotate(
-            angle: widget.rotation,
-            child: child,
-          ),
+          child: Transform.rotate(angle: widget.rotation, child: child),
         );
       },
       child: Text(
         widget.emoji,
-        style: TextStyle(
-          fontSize: widget.size,
-          height: 1.0,
-        ),
+        style: TextStyle(fontSize: widget.size, height: 1.0),
       ),
     );
   }
@@ -111,8 +102,7 @@ class _Bubble extends StatefulWidget {
   State<_Bubble> createState() => _BubbleState();
 }
 
-class _BubbleState extends State<_Bubble>
-    with SingleTickerProviderStateMixin {
+class _BubbleState extends State<_Bubble> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
   late Animation<double> _scaleAnimation;
@@ -130,13 +120,15 @@ class _BubbleState extends State<_Bubble>
 
     _animation = Tween<double>(begin: 0, end: 1).animate(_controller);
 
-    _scaleAnimation = Tween<double>(begin: 0.3, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 0.3,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
-    _opacityAnimation = Tween<double>(begin: 0.6, end: 0.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
-    );
+    _opacityAnimation = Tween<double>(
+      begin: 0.6,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
 
     // เริ่ม animation และ repeat เมื่อจบ
     _controller.forward().then((_) {
@@ -145,12 +137,15 @@ class _BubbleState extends State<_Bubble>
         _controller.forward().then((_) {
           if (mounted) {
             // สุ่มเวลา delay ก่อนเริ่มใหม่
-            Future.delayed(Duration(milliseconds: 500 + Random().nextInt(1000)), () {
-              if (mounted) {
-                _controller.reset();
-                _controller.forward();
-              }
-            });
+            Future.delayed(
+              Duration(milliseconds: 500 + Random().nextInt(1000)),
+              () {
+                if (mounted) {
+                  _controller.reset();
+                  _controller.forward();
+                }
+              },
+            );
           }
         });
       }
@@ -168,7 +163,8 @@ class _BubbleState extends State<_Bubble>
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
-        final currentY = widget.startY + (widget.endY - widget.startY) * _animation.value;
+        final currentY =
+            widget.startY + (widget.endY - widget.startY) * _animation.value;
 
         return Positioned(
           left: widget.startX + (currentY * 0.1).clamp(-5, 5),
@@ -231,7 +227,8 @@ class _SelectedIngredient {
   });
 }
 
-class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixin {
+class LabScreenState extends State<LabScreen>
+    with SingleTickerProviderStateMixin {
   final Set<int> _fruits = {};
   final Set<int> _extras = {};
   final Set<int> _veggies = {};
@@ -263,9 +260,10 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
       vsync: this,
     );
 
-    _shakeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _shakeController, curve: Curves.easeOut),
-    );
+    _shakeAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(CurvedAnimation(parent: _shakeController, curve: Curves.easeOut));
   }
 
   bool _hasLoadedPendingPreset = false;
@@ -402,14 +400,20 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
   }
 
   // Helper method to add ingredient to order list
-  void _addIngredientToOrder(String type, int index, List<(String, String, double)> dataList) {
+  void _addIngredientToOrder(
+    String type,
+    int index,
+    List<(String, String, double)> dataList,
+  ) {
     final data = dataList[index];
-    _selectedIngredientsOrder.add(_SelectedIngredient(
-      emoji: data.$1,
-      name: data.$2,
-      price: data.$3,
-      type: type,
-    ));
+    _selectedIngredientsOrder.add(
+      _SelectedIngredient(
+        emoji: data.$1,
+        name: data.$2,
+        price: data.$3,
+        type: type,
+      ),
+    );
   }
 
   // Helper method to remove ingredient from order list
@@ -452,7 +456,9 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
   // อัปเดตตำแหน่งวัตถุดิบเมื่อมีการเปลี่ยนแปลง
   void _updateIngredientPositions({bool forceRecalculate = false}) {
     // ใช้ลำดับการเลือกจริงจาก _selectedIngredientsOrder
-    final allEmojis = _selectedIngredientsOrder.map((item) => item.emoji).toList();
+    final allEmojis = _selectedIngredientsOrder
+        .map((item) => item.emoji)
+        .toList();
 
     final cupW = _cupDimensions.$1;
     final cupH = _cupDimensions.$2;
@@ -482,14 +488,16 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
         final randomSize = 14 + random.nextDouble() * 8;
         final floatDuration = 2000 + random.nextInt(2000);
 
-        newPositions.add(_IngredientPosition(
-          emoji: allEmojis[i],
-          x: randomX,
-          y: randomY,
-          rotation: randomRotation,
-          size: randomSize,
-          floatDuration: floatDuration,
-        ));
+        newPositions.add(
+          _IngredientPosition(
+            emoji: allEmojis[i],
+            x: randomX,
+            y: randomY,
+            rotation: randomRotation,
+            size: randomSize,
+            floatDuration: floatDuration,
+          ),
+        );
       }
     }
 
@@ -534,7 +542,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
     for (final i in _fruits) t += kFruitsData[i].$3;
     for (final i in _extras) t += kExtrasData[i].$3;
     for (final i in _veggies) t += kVeggiesData[i].$3;
-    for (final i in _herbs) t += kHerbsData[i].$3;  // ✅ เพิ่ม herbs
+    for (final i in _herbs) t += kHerbsData[i].$3; // ✅ เพิ่ม herbs
     for (final i in _toppings) t += kToppingItems[i].price;
 
     // เพิ่มราคาตามไซส์แก้ว (S: 0, M: +7, L: +15)
@@ -546,12 +554,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
 
   // คำนวณสี blend จากวัตถุดิบที่เลือก
   Color get _blendedColor {
-    final allIndices = [
-      ..._fruits,
-      ..._extras,
-      ..._veggies,
-      ..._herbs,
-    ];
+    final allIndices = [..._fruits, ..._extras, ..._veggies, ..._herbs];
 
     if (allIndices.isEmpty) {
       return const Color(0xFFE8F5E9); // สีเขียวอ่อน default
@@ -657,10 +660,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
             builder: (_, value, child) {
               return Transform.translate(
                 offset: Offset(0, 15 * (1 - value)),
-                child: Opacity(
-                  opacity: value * 0.9,
-                  child: child,
-                ),
+                child: Opacity(opacity: value * 0.9, child: child),
               );
             },
             child: _FloatingIngredient(
@@ -777,7 +777,9 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                                   spreadRadius: 3,
                                 ),
                                 BoxShadow(
-                                  color: Colors.pink.shade700.withValues(alpha: 0.04),
+                                  color: Colors.pink.shade700.withValues(
+                                    alpha: 0.04,
+                                  ),
                                   blurRadius: 15,
                                   spreadRadius: 2,
                                 ),
@@ -790,16 +792,23 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                             height: 200,
                             child: Center(
                               child: AnimatedBuilder(
-                                animation: _shakeAnimation ?? const AlwaysStoppedAnimation(0),
+                                animation:
+                                    _shakeAnimation ??
+                                    const AlwaysStoppedAnimation(0),
                                 builder: (context, child) {
-                                  if (_shakeAnimation == null) return child ?? const SizedBox();
+                                  if (_shakeAnimation == null)
+                                    return child ?? const SizedBox();
 
-                                  final shakeOffset = _shakeAnimation!.value < 0.5
+                                  final shakeOffset =
+                                      _shakeAnimation!.value < 0.5
                                       ? _shakeAnimation!.value * 10
                                       : (1 - _shakeAnimation!.value) * 10;
 
                                   return Transform.translate(
-                                    offset: Offset(shakeOffset * 0.3, shakeOffset * 0.1),
+                                    offset: Offset(
+                                      shakeOffset * 0.3,
+                                      shakeOffset * 0.1,
+                                    ),
                                     child: Transform.rotate(
                                       angle: shakeOffset * 0.02,
                                       child: child,
@@ -811,12 +820,16 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                                     borderRadius: BorderRadius.circular(20),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.pink.shade700.withValues(alpha: 0.05),
+                                        color: Colors.pink.shade700.withValues(
+                                          alpha: 0.05,
+                                        ),
                                         blurRadius: 20,
                                         offset: const Offset(-3, 6),
                                       ),
                                       BoxShadow(
-                                        color: Colors.green.withValues(alpha: 0.04),
+                                        color: Colors.green.withValues(
+                                          alpha: 0.04,
+                                        ),
                                         blurRadius: 15,
                                         offset: const Offset(3, 3),
                                       ),
@@ -838,126 +851,146 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
 
                       // ── Selected Ingredients Row ───────────────────
                       Container(
-                  margin: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: Colors.green.shade50,
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.03),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        'Your Formula',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey.shade700,
-                          letterSpacing: 0.5,
+                        margin: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: [
-                              if (_selectedIngredientsOrder.isEmpty)
-                                Text(
-                                  'Not selected',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.grey.shade400,
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                )
-                              else ...[
-                                ..._selectedIngredientsOrder.map((item) {
-                                  Color chipColor;
-                                  Color textColor;
-
-                                  switch (item.type) {
-                                    case 'fruit':
-                                      chipColor = Colors.pink.shade50;
-                                      textColor = Colors.pink.shade700;
-                                      break;
-                                    case 'veggie':
-                                      chipColor = Colors.green.shade50;
-                                      textColor = Colors.green;
-                                      break;
-                                    case 'extra':
-                                      chipColor = Colors.amber.shade50;
-                                      textColor = Colors.amber.shade700;
-                                      break;
-                                    case 'herb':
-                                      chipColor = Colors.lime.shade50;
-                                      textColor = Colors.lime.shade700;
-                                      break;
-                                    default:
-                                      chipColor = Colors.grey.shade50;
-                                      textColor = Colors.grey.shade700;
-                                  }
-
-                                  return Container(
-                                    margin: const EdgeInsets.only(right: 5),
-                                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                                    decoration: BoxDecoration(
-                                      color: chipColor,
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                        color: textColor.withValues(alpha: 0.2),
-                                        width: 0.8,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          item.emoji,
-                                          style: const TextStyle(fontSize: 9),
-                                        ),
-                                        const SizedBox(width: 2),
-                                        Text(
-                                          item.name,
-                                          style: TextStyle(
-                                            fontSize: 8,
-                                            color: textColor,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                }),
-                              ],
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.green.shade50,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          '${_selectedIngredientsOrder.length}',
-                          style: TextStyle(
-                            fontSize: 8,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.green,
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: Colors.green.shade50,
+                            width: 1,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.03),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          children: [
+                            Text(
+                              'Your Formula',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey.shade700,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: [
+                                    if (_selectedIngredientsOrder.isEmpty)
+                                      Text(
+                                        'Not selected',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.grey.shade400,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      )
+                                    else ...[
+                                      ..._selectedIngredientsOrder.map((item) {
+                                        Color chipColor;
+                                        Color textColor;
+
+                                        switch (item.type) {
+                                          case 'fruit':
+                                            chipColor = Colors.pink.shade50;
+                                            textColor = Colors.pink.shade700;
+                                            break;
+                                          case 'veggie':
+                                            chipColor = Colors.green.shade50;
+                                            textColor = Colors.green;
+                                            break;
+                                          case 'extra':
+                                            chipColor = Colors.amber.shade50;
+                                            textColor = Colors.amber.shade700;
+                                            break;
+                                          case 'herb':
+                                            chipColor = Colors.lime.shade50;
+                                            textColor = Colors.lime.shade700;
+                                            break;
+                                          default:
+                                            chipColor = Colors.grey.shade50;
+                                            textColor = Colors.grey.shade700;
+                                        }
+
+                                        return Container(
+                                          margin: const EdgeInsets.only(
+                                            right: 5,
+                                          ),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 7,
+                                            vertical: 3,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: chipColor,
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
+                                            border: Border.all(
+                                              color: textColor.withValues(
+                                                alpha: 0.2,
+                                              ),
+                                              width: 0.8,
+                                            ),
+                                          ),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Text(
+                                                item.emoji,
+                                                style: const TextStyle(
+                                                  fontSize: 9,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 2),
+                                              Text(
+                                                item.name,
+                                                style: TextStyle(
+                                                  fontSize: 8,
+                                                  color: textColor,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                      }),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.green.shade50,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                '${_selectedIngredientsOrder.length}',
+                                style: TextStyle(
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.green,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -966,17 +999,14 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
               ],
             ),
           ),
-        ],
-      ),
-    ),
 
-    // ── Scrollable content ────────────────────────────
-    Expanded(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          // ── Scrollable content ────────────────────────────
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   // ── Size ───────────────────────────────────
                   const Text(
                     '🥤 Select Size',
@@ -998,7 +1028,9 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                               onTap: () {
                                 _size = s;
                                 setState(() {
-                                  _updateIngredientPositions(forceRecalculate: true);
+                                  _updateIngredientPositions(
+                                    forceRecalculate: true,
+                                  );
                                 });
                               },
                               child: Container(
@@ -1249,7 +1281,11 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                                 _removeIngredientFromOrder('veggie', i);
                               } else {
                                 _veggies.add(i);
-                                _addIngredientToOrder('veggie', i, kVeggiesData);
+                                _addIngredientToOrder(
+                                  'veggie',
+                                  i,
+                                  kVeggiesData,
+                                );
                                 _shakeCup();
                               }
                               setState(() {
@@ -1347,9 +1383,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                             color: sel ? const Color(0xFFE8F5E9) : Colors.white,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: sel
-                                  ? Colors.green
-                                  : Colors.grey.shade200,
+                              color: sel ? Colors.green : Colors.grey.shade200,
                               width: sel ? 2 : 1,
                             ),
                           ),
@@ -1421,9 +1455,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                             color: sel ? const Color(0xFFE8F5E9) : Colors.white,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: sel
-                                  ? Colors.green
-                                  : Colors.grey.shade200,
+                              color: sel ? Colors.green : Colors.grey.shade200,
                               width: sel ? 2 : 1,
                             ),
                           ),
@@ -1480,7 +1512,9 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                               style: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
-                                color: sel ? Colors.green : Colors.pink.shade700,
+                                color: sel
+                                    ? Colors.green
+                                    : Colors.pink.shade700,
                               ),
                             ),
                           ],
@@ -1550,125 +1584,138 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                       const SizedBox(width: 8),
                       ElevatedButton(
                         onPressed: (_fruits.isEmpty && _veggies.isEmpty)
-                        ? null
-                        : () {
-                            final sweetness =
-                                kSweetnessLevels[_sweetnessIndex].$2;
+                            ? null
+                            : () {
+                                final sweetness =
+                                    kSweetnessLevels[_sweetnessIndex].$2;
 
-                            // ถ้ามาจากเมนู ใช้ชื่อและ emoji เมนูนั้น
-                            final isFromMenu = _presetMenuName != null;
-                            final itemName = _presetMenuName ?? 'My Formula';
-                            final itemEmoji = _presetMenuEmoji ?? '🧪';
+                                // ถ้ามาจากเมนู ใช้ชื่อและ emoji เมนูนั้น
+                                final isFromMenu = _presetMenuName != null;
+                                final itemName =
+                                    _presetMenuName ?? 'My Formula';
+                                final itemEmoji = _presetMenuEmoji ?? '🧪';
 
-                            final newItem = SmoothieItem(
-                              name: itemName,
-                              emoji: itemEmoji,
-                              basePrice: _total / _sizeMultiplier,
-                              ingredients: [
-                                ..._fruits.map((i) => kFruitsData[i].$2),
-                                ..._extras.map((i) => kExtrasData[i].$2),
-                                ..._veggies.map((i) => kVeggiesData[i].$2),
-                              ],
-                              category: 'green',
-                            );
+                                final newItem = SmoothieItem(
+                                  name: itemName,
+                                  emoji: itemEmoji,
+                                  basePrice: _total / _sizeMultiplier,
+                                  ingredients: [
+                                    ..._fruits.map((i) => kFruitsData[i].$2),
+                                    ..._extras.map((i) => kExtrasData[i].$2),
+                                    ..._veggies.map((i) => kVeggiesData[i].$2),
+                                  ],
+                                  category: 'green',
+                                );
 
-                            final nav = context.read<NavigationProvider>();
+                                final nav = context.read<NavigationProvider>();
 
-                            if (isEditing) {
-                              cart.updateItemAt(
-                                nav.editingCartIndex!,
-                                newItem,
-                                size: _size,
-                                toppings: _toppings
-                                    .map((i) => kToppingItems[i])
-                                    .toList(),
-                                sweetness: sweetness,
-                                fruitIndexes: _fruits.toList(),
-                                extrasIndexes: _extras.map((i) => i + 30).toList(),
-                                veggieIndexes: _veggies.map((i) => i + 100).toList(),
-                                herbsIndexes: _herbs.map((i) => i + 260).toList(),
-                                isCustom: !isFromMenu, // ✅
-                              );
-                              nav.clearEditingIndex();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Cart updated ✅'),
-                                  backgroundColor: Colors.green,
-                                  duration: const Duration(seconds: 2),
-                                ),
-                              );
-                            } else {
-                              cart.addItem(
-                                newItem,
-                                size: _size,
-                                toppings: _toppings
-                                    .map((i) => kToppingItems[i])
-                                    .toList(),
-                                sweetness: sweetness,
-                                isCustom:
-                                    !isFromMenu, // false ถ้าเป็นเมนูจาก list
-                                fruitIndexes: _fruits.toList(),
-                                extrasIndexes: _extras.map((i) => i + 30).toList(),
-                                veggieIndexes: _veggies.map((i) => i + 100).toList(),
-                                herbsIndexes: _herbs.map((i) => i + 260).toList(),
-                              );
-                              // snackbar แสดงชื่อเมนูจริง
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    isFromMenu
-                                        ? 'Added $itemName $itemEmoji!'
-                                        : 'Added ${_selectedIngredientsOrder.map((e) => e.name).join('+')}! 🧪',
-                                  ),
-                                  backgroundColor: Colors.green,
-                                  duration: const Duration(seconds: 2),
-                                ),
-                              );
-                            }
+                                if (isEditing) {
+                                  cart.updateItemAt(
+                                    nav.editingCartIndex!,
+                                    newItem,
+                                    size: _size,
+                                    toppings: _toppings
+                                        .map((i) => kToppingItems[i])
+                                        .toList(),
+                                    sweetness: sweetness,
+                                    fruitIndexes: _fruits.toList(),
+                                    extrasIndexes: _extras
+                                        .map((i) => i + 30)
+                                        .toList(),
+                                    veggieIndexes: _veggies
+                                        .map((i) => i + 100)
+                                        .toList(),
+                                    herbsIndexes: _herbs
+                                        .map((i) => i + 260)
+                                        .toList(),
+                                    isCustom: !isFromMenu, // ✅
+                                  );
+                                  nav.clearEditingIndex();
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text('Cart updated ✅'),
+                                      backgroundColor: Colors.green,
+                                      duration: const Duration(seconds: 2),
+                                    ),
+                                  );
+                                } else {
+                                  cart.addItem(
+                                    newItem,
+                                    size: _size,
+                                    toppings: _toppings
+                                        .map((i) => kToppingItems[i])
+                                        .toList(),
+                                    sweetness: sweetness,
+                                    isCustom:
+                                        !isFromMenu, // false ถ้าเป็นเมนูจาก list
+                                    fruitIndexes: _fruits.toList(),
+                                    extrasIndexes: _extras
+                                        .map((i) => i + 30)
+                                        .toList(),
+                                    veggieIndexes: _veggies
+                                        .map((i) => i + 100)
+                                        .toList(),
+                                    herbsIndexes: _herbs
+                                        .map((i) => i + 260)
+                                        .toList(),
+                                  );
+                                  // snackbar แสดงชื่อเมนูจริง
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        isFromMenu
+                                            ? 'Added $itemName $itemEmoji!'
+                                            : 'Added ${_selectedIngredientsOrder.map((e) => e.name).join('+')}! 🧪',
+                                      ),
+                                      backgroundColor: Colors.green,
+                                      duration: const Duration(seconds: 2),
+                                    ),
+                                  );
+                                }
 
-                            // clear
-                            setState(() {
-                              _fruits.clear();
-                              _extras.clear();
-                              _veggies.clear();
-                              _herbs.clear();
-                              _toppings.clear();
-                              _ingredientPositions.clear();
-                              _selectedIngredientsOrder.clear();
-                              _size = 'S';
-                              _sweetnessIndex = 2;
-                              _presetMenuName = null; // ✅ reset
-                              _presetMenuEmoji = null; // ✅
-                            });
-                          },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: isEditing
-                        ? Colors.green
-                        : Colors.green,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: Colors.grey.shade300,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 14,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
+                                // clear
+                                setState(() {
+                                  _fruits.clear();
+                                  _extras.clear();
+                                  _veggies.clear();
+                                  _herbs.clear();
+                                  _toppings.clear();
+                                  _ingredientPositions.clear();
+                                  _selectedIngredientsOrder.clear();
+                                  _size = 'S';
+                                  _sweetnessIndex = 2;
+                                  _presetMenuName = null; // ✅ reset
+                                  _presetMenuEmoji = null; // ✅
+                                });
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: isEditing
+                              ? Colors.green
+                              : Colors.green,
+                          foregroundColor: Colors.white,
+                          disabledBackgroundColor: Colors.grey.shade300,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 14,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        // Change button text based on mode
+                        child: Text(
+                          isEditing ? 'Update Cart' : 'Add to Cart →',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
                   ),
-                  // Change button text based on mode
-                  child: Text(
-                    isEditing ? 'Update Cart' : 'Add to Cart →',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
-    ),
-    ],
-  ),
-);
+    );
   }
 }

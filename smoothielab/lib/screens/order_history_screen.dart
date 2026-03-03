@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import '../models/order_model.dart';
+import '../models/smoothie_item.dart';
+import '../models/cart_item.dart';
+import '../data/ingredients_data.dart';
+import '../providers/cart_provider.dart';
 import '../widgets/floating_cart_button.dart';
 import 'track_order_screen.dart';
 
@@ -241,6 +246,94 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen>
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Helper: แปลง OrderModel → CartItem แล้ว add เข้า CartProvider
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// ค้นหา ToppingItem จากชื่อใน kToppingData
+ToppingItem? _findTopping(String name) {
+  try {
+    return kToppingData.firstWhere((t) => t.name == name);
+  } catch (_) {
+    return null;
+  }
+}
+
+SmoothieItem _smoothieFromOrder(OrderModel order) {
+  // ลอง match กับ kMenuItems ก่อน (preset menu)
+  try {
+    return kMenuItems.firstWhere(
+      (m) => m.name == order.menuName && m.emoji == order.menuEmoji,
+    );
+  } catch (_) {
+    // custom smoothie — back-calculate basePrice จาก itemPriceRaw
+    // itemPriceRaw = (basePrice * sizeMultiplier + toppingTotal) * qty
+    // qty ของแต่ละ row ใน history = 1 เสมอ
+    // ดังนั้น: basePrice = (itemPriceRaw - toppingTotal) / sizeMultiplier
+    final toppings = order.toppings
+        .map((name) => _findTopping(name))
+        .whereType<ToppingItem>()
+        .toList();
+    final toppingTotal = toppings.fold(0.0, (s, t) => s + t.price);
+    final multiplier = kSizeMultiplier[order.size] ?? 1.3;
+    final basePrice = (order.itemPriceRaw - toppingTotal) / multiplier;
+
+    return SmoothieItem(
+      name: order.menuName,
+      emoji: order.menuEmoji,
+      basePrice: basePrice,
+      ingredients: order.ingredients,
+      category: 'custom',
+    );
+  }
+}
+
+void _orderAgain(BuildContext context, List<OrderModel> orders) {
+  final cart = context.read<CartProvider>();
+
+  for (final order in orders) {
+    final smoothie = _smoothieFromOrder(order);
+    final toppings = order.toppings
+        .map((name) => _findTopping(name))
+        .whereType<ToppingItem>()
+        .toList();
+
+    final isCustom = !kMenuItems.any(
+      (m) => m.name == order.menuName && m.emoji == order.menuEmoji,
+    );
+
+    cart.addItem(
+      smoothie,
+      size: order.size,
+      toppings: toppings,
+      sweetness: order.sweetness,
+      isCustom: isCustom,
+    );
+  }
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Row(
+        children: [
+          const Text('🛒', style: TextStyle(fontSize: 18)),
+          const SizedBox(width: 10),
+          Text(
+            'Added ${orders.length} item${orders.length > 1 ? 's' : ''} to cart!',
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
+      backgroundColor: const Color(0xFF2E7D32),
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      margin: const EdgeInsets.all(16),
+      duration: const Duration(seconds: 2),
+    ),
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 class _FilterChip extends StatelessWidget {
   final String label, emoji;
   final bool selected;
@@ -314,6 +407,84 @@ class _OrderCard extends StatelessWidget {
     required this.cardIndex,
   });
 
+  /// Dialog ยืนยันยกเลิกออเดอร์
+  Future<void> _confirmCancel(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Column(
+          children: [
+            Text('🚫', style: TextStyle(fontSize: 36)),
+            SizedBox(height: 8),
+            Text(
+              'Cancel Order?',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+          ],
+        ),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+        content: Text(
+          'Cancel order "$id"?\nThis action cannot be undone.',
+          textAlign: TextAlign.center,
+          style: const TextStyle(color: Colors.grey),
+        ),
+        actionsAlignment: MainAxisAlignment.center,
+        actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+        actions: [
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'Keep Order',
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red.shade400,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'Cancel Order',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final box = Hive.box<OrderModel>('orders');
+      for (final entry in box.toMap().entries) {
+        if (entry.value.orderId == id) {
+          entry.value.status = 'cancelled';
+          entry.value.save();
+        }
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return TweenAnimationBuilder<double>(
@@ -344,7 +515,7 @@ class _OrderCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            // Header
+            // ── Header ──────────────────────────────────────────────
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
@@ -417,7 +588,7 @@ class _OrderCard extends StatelessWidget {
               ),
             ),
 
-            // Items
+            // ── Items ────────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
               child: Column(
@@ -473,7 +644,6 @@ class _OrderCard extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                // ── Ingredients ──────────────────
                                 if (item.ingredients.isNotEmpty) ...[
                                   const SizedBox(height: 5),
                                   Wrap(
@@ -504,7 +674,6 @@ class _OrderCard extends StatelessWidget {
                                         .toList(),
                                   ),
                                 ],
-                                // ── Sweetness ────────────────────
                                 if (item.sweetness.isNotEmpty) ...[
                                   const SizedBox(height: 4),
                                   Container(
@@ -526,7 +695,6 @@ class _OrderCard extends StatelessWidget {
                                     ),
                                   ),
                                 ],
-                                // ── Toppings ─────────────────────
                                 if (item.toppings.isNotEmpty) ...[
                                   const SizedBox(height: 4),
                                   Wrap(
@@ -575,7 +743,7 @@ class _OrderCard extends StatelessWidget {
               ),
             ),
 
-            // Footer
+            // ── Footer ───────────────────────────────────────────────
             Container(
               margin: const EdgeInsets.fromLTRB(16, 8, 16, 14),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -586,6 +754,7 @@ class _OrderCard extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  // Total
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -610,7 +779,10 @@ class _OrderCard extends StatelessWidget {
                       ),
                     ],
                   ),
+
+                  // Buttons
                   if (first.status == 'processing')
+                    // Track only
                     ElevatedButton.icon(
                       onPressed: () => Navigator.push(
                         context,
@@ -641,8 +813,9 @@ class _OrderCard extends StatelessWidget {
                       ),
                     )
                   else
+                    // Order Again
                     OutlinedButton.icon(
-                      onPressed: () {},
+                      onPressed: () => _orderAgain(context, items),
                       icon: const Icon(Icons.replay_rounded, size: 15),
                       label: const Text(
                         'Order Again',

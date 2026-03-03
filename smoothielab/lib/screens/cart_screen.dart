@@ -18,14 +18,19 @@ class CartScreen extends StatelessWidget {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('My Cart',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            const Text(
+              'My Cart',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
             if (cart.totalCount > 0)
-              Text('${cart.totalCount} items',
-                  style: const TextStyle(
-                      color: Colors.grey,
-                      fontSize: 12,
-                      fontWeight: FontWeight.normal)),
+              Text(
+                '${cart.totalCount} items',
+                style: const TextStyle(
+                  color: Colors.grey,
+                  fontSize: 12,
+                  fontWeight: FontWeight.normal,
+                ),
+              ),
           ],
         ),
         backgroundColor: const Color(0xFFF8F8F8),
@@ -58,7 +63,8 @@ class _EmptyCart extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 100, height: 100,
+            width: 100,
+            height: 100,
             decoration: BoxDecoration(
               color: Colors.grey.shade100,
               shape: BoxShape.circle,
@@ -68,14 +74,19 @@ class _EmptyCart extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          const Text('Your cart is empty',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: Colors.black87)),
+          const Text(
+            'Your cart is empty',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              color: Colors.black87,
+            ),
+          ),
           const SizedBox(height: 6),
-          const Text('Add some smoothies to get started!',
-              style: TextStyle(color: Colors.grey, fontSize: 13)),
+          const Text(
+            'Add some smoothies to get started!',
+            style: TextStyle(color: Colors.grey, fontSize: 13),
+          ),
         ],
       ),
     );
@@ -88,19 +99,25 @@ class _CartItemCard extends StatelessWidget {
   const _CartItemCard({required this.index});
 
   Future<void> _confirmDelete(
-      BuildContext context, CartProvider cart, int i) async {
+    BuildContext context,
+    CartProvider cart,
+    int i,
+  ) async {
     final item = cart.items[i];
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: const Column(children: [
-          Text('🗑️', style: TextStyle(fontSize: 36)),
-          SizedBox(height: 8),
-          Text('Remove Item?',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        ]),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Column(
+          children: [
+            Text('🗑️', style: TextStyle(fontSize: 36)),
+            SizedBox(height: 8),
+            Text(
+              'Remove Item?',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+          ],
+        ),
         titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
         content: Text(
           'Remove "${item.displayName}" from your cart?',
@@ -110,36 +127,44 @@ class _CartItemCard extends StatelessWidget {
         actionsAlignment: MainAxisAlignment.center,
         actionsPadding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
         actions: [
-          Row(children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () => Navigator.pop(context, false),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.grey),
+                  ),
                 ),
-                child: const Text('Cancel',
-                    style: TextStyle(color: Colors.grey)),
               ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context, true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red.shade400,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  elevation: 0,
+              const SizedBox(width: 10),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red.shade400,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'Remove',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
-                child: const Text('Remove',
-                    style: TextStyle(fontWeight: FontWeight.bold)),
               ),
-            ),
-          ]),
+            ],
+          ),
         ],
       ),
     );
@@ -159,9 +184,10 @@ class _CartItemCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 3)),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
         ],
       ),
       child: Padding(
@@ -171,14 +197,17 @@ class _CartItemCard extends StatelessWidget {
           children: [
             // ── Emoji box ──────────────────────────────
             Container(
-              width: 58, height: 58,
+              width: 58,
+              height: 58,
               decoration: BoxDecoration(
                 color: const Color(0xFFF0FFF4),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Center(
-                child: Text(item.smoothie.emoji,
-                    style: const TextStyle(fontSize: 30)),
+                child: Text(
+                  item.smoothie.emoji,
+                  style: const TextStyle(fontSize: 30),
+                ),
               ),
             ),
             const SizedBox(width: 14),
@@ -196,7 +225,9 @@ class _CartItemCard extends StatelessWidget {
                         child: Text(
                           item.displayName,
                           style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 15),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
                         ),
                       ),
                       // Edit button
@@ -210,8 +241,9 @@ class _CartItemCard extends StatelessWidget {
                             veggieIndexes: item.veggieIndexes,
                             herbsIndexes: item.herbsIndexes,
                             menuName: item.isCustom ? null : item.smoothie.name,
-                            menuEmoji:
-                                item.isCustom ? null : item.smoothie.emoji,
+                            menuEmoji: item.isCustom
+                                ? null
+                                : item.smoothie.emoji,
                             editIndex: index,
                           );
                         },
@@ -221,8 +253,11 @@ class _CartItemCard extends StatelessWidget {
                             color: Colors.grey.shade100,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(Icons.edit_rounded,
-                              size: 15, color: Colors.grey),
+                          child: const Icon(
+                            Icons.edit_rounded,
+                            size: 15,
+                            color: Colors.grey,
+                          ),
                         ),
                       ),
                     ],
@@ -235,12 +270,16 @@ class _CartItemCard extends StatelessWidget {
                     spacing: 6,
                     runSpacing: 4,
                     children: [
-                      _Tag(item.size,
-                          icon: Icons.local_drink_rounded,
-                          color: const Color(0xFF4CAF50)),
-                      _Tag(item.sweetness,
-                          icon: Icons.water_drop_rounded,
-                          color: Colors.amber.shade700),
+                      _Tag(
+                        item.size,
+                        icon: Icons.local_drink_rounded,
+                        color: const Color(0xFF4CAF50),
+                      ),
+                      _Tag(
+                        item.sweetness,
+                        icon: Icons.water_drop_rounded,
+                        color: Colors.amber.shade700,
+                      ),
                     ],
                   ),
 
@@ -251,19 +290,25 @@ class _CartItemCard extends StatelessWidget {
                       spacing: 4,
                       runSpacing: 4,
                       children: item.toppings
-                          .map((ToppingItem t) => Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 7, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade100,
-                                  borderRadius: BorderRadius.circular(20),
+                          .map(
+                            (ToppingItem t) => Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 7,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                '${t.emoji} ${t.name}',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.black87,
                                 ),
-                                child: Text(
-                                  '${t.emoji} ${t.name}',
-                                  style: const TextStyle(
-                                      fontSize: 11, color: Colors.black87),
-                                ),
-                              ))
+                              ),
+                            ),
+                          )
                           .toList(),
                     ),
                   ],
@@ -277,40 +322,45 @@ class _CartItemCard extends StatelessWidget {
                       Text(
                         '฿${item.itemPrice.toStringAsFixed(0)}',
                         style: const TextStyle(
-                            color: Color(0xFFFF6B35),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16),
+                          color: Color(0xFFFF6B35),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
 
                       // Qty row
-                      Row(children: [
-                        _QtyButton(
-                          icon: Icons.remove,
-                          color: Colors.grey.shade200,
-                          iconColor: Colors.black87,
-                          onTap: () async {
-                            final need = cart.decrementAt(index);
-                            if (need && context.mounted) {
-                              await _confirmDelete(context, cart, index);
-                            }
-                          },
-                        ),
-                        Container(
-                          width: 36,
-                          alignment: Alignment.center,
-                          child: Text(
-                            '${item.quantity}',
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 15),
+                      Row(
+                        children: [
+                          _QtyButton(
+                            icon: Icons.remove,
+                            color: Colors.grey.shade200,
+                            iconColor: Colors.black87,
+                            onTap: () async {
+                              final need = cart.decrementAt(index);
+                              if (need && context.mounted) {
+                                await _confirmDelete(context, cart, index);
+                              }
+                            },
                           ),
-                        ),
-                        _QtyButton(
-                          icon: Icons.add,
-                          color: const Color(0xFF4CAF50),
-                          iconColor: Colors.white,
-                          onTap: () => cart.incrementAt(index),
-                        ),
-                      ]),
+                          Container(
+                            width: 36,
+                            alignment: Alignment.center,
+                            child: Text(
+                              '${item.quantity}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ),
+                          _QtyButton(
+                            icon: Icons.add,
+                            color: const Color(0xFF4CAF50),
+                            iconColor: Colors.white,
+                            onTap: () => cart.incrementAt(index),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ],
@@ -343,11 +393,14 @@ class _Tag extends StatelessWidget {
         children: [
           Icon(icon, size: 10, color: color),
           const SizedBox(width: 4),
-          Text(label,
-              style: TextStyle(
-                  fontSize: 11,
-                  color: color,
-                  fontWeight: FontWeight.w600)),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11,
+              color: color,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
     );
@@ -360,20 +413,24 @@ class _QtyButton extends StatelessWidget {
   final Color color;
   final Color iconColor;
   final VoidCallback onTap;
-  const _QtyButton(
-      {required this.icon,
-      required this.color,
-      required this.iconColor,
-      required this.onTap});
+  const _QtyButton({
+    required this.icon,
+    required this.color,
+    required this.iconColor,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 30, height: 30,
+        width: 30,
+        height: 30,
         decoration: BoxDecoration(
-            color: color, borderRadius: BorderRadius.circular(8)),
+          color: color,
+          borderRadius: BorderRadius.circular(8),
+        ),
         child: Icon(icon, size: 15, color: iconColor),
       ),
     );
@@ -394,9 +451,10 @@ class _SummaryPanel extends StatelessWidget {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 16,
-              offset: const Offset(0, -4)),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
         ],
       ),
       child: SafeArea(
@@ -404,7 +462,8 @@ class _SummaryPanel extends StatelessWidget {
           children: [
             // Handle bar
             Container(
-              width: 36, height: 4,
+              width: 36,
+              height: 4,
               margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
                 color: Colors.grey.shade300,
@@ -420,53 +479,67 @@ class _SummaryPanel extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 6),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 12, vertical: 7),
+                    horizontal: 12,
+                    vertical: 7,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.green.shade50,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Row(children: [
-                    const Text('🎁', style: TextStyle(fontSize: 14)),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Add ฿${(100 - cart.subtotal).toStringAsFixed(0)} more for 5% off!',
-                      style: TextStyle(
+                  child: Row(
+                    children: [
+                      const Text('🎁', style: TextStyle(fontSize: 14)),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Add ฿${(100 - cart.subtotal).toStringAsFixed(0)} more for 5% off!',
+                        style: TextStyle(
                           fontSize: 12,
                           color: Colors.green.shade700,
-                          fontWeight: FontWeight.w500),
-                    ),
-                  ]),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
 
             if (cart.discount > 0) ...[
               const SizedBox(height: 2),
-              _PriceRow(cart.discountLabel, -cart.discount,
-                  color: Colors.green,
-                  prefix: '🎉 '),
+              _PriceRow(
+                cart.discountLabel,
+                -cart.discount,
+                color: Colors.green,
+                prefix: '🎉 ',
+              ),
             ],
 
             _PriceRow('VAT 7%', cart.vat, color: Colors.grey),
 
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Row(children: [
-                Expanded(child: Divider(color: Colors.grey.shade200)),
-              ]),
+              child: Row(
+                children: [
+                  Expanded(child: Divider(color: Colors.grey.shade200)),
+                ],
+              ),
             ),
 
             // Total
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Total',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 16)),
-                Text('฿${cart.total.toStringAsFixed(0)}',
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 22,
-                        color: Color(0xFFFF6B35))),
+                const Text(
+                  'Total',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                Text(
+                  '฿${cart.total.toStringAsFixed(0)}',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 22,
+                    color: Color(0xFFFF6B35),
+                  ),
+                ),
               ],
             ),
 
@@ -476,14 +549,17 @@ class _SummaryPanel extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => Navigator.push(context,
-                    MaterialPageRoute(builder: (_) => const PaymentScreen())),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const PaymentScreen()),
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF6B35),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   elevation: 0,
                 ),
                 child: Row(
@@ -494,7 +570,9 @@ class _SummaryPanel extends StatelessWidget {
                     Text(
                       'Checkout  ฿${cart.total.toStringAsFixed(0)}',
                       style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -513,8 +591,7 @@ class _PriceRow extends StatelessWidget {
   final double amount;
   final Color? color;
   final String prefix;
-  const _PriceRow(this.label, this.amount,
-      {this.color, this.prefix = ''});
+  const _PriceRow(this.label, this.amount, {this.color, this.prefix = ''});
 
   @override
   Widget build(BuildContext context) {
@@ -523,16 +600,17 @@ class _PriceRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('$prefix$label',
-              style: TextStyle(
-                  fontSize: 14,
-                  color: color ?? Colors.black87)),
+          Text(
+            '$prefix$label',
+            style: TextStyle(fontSize: 14, color: color ?? Colors.black87),
+          ),
           Text(
             '${amount < 0 ? '-' : ''}฿${amount.abs().toStringAsFixed(0)}',
             style: TextStyle(
-                fontSize: 14,
-                color: color ?? Colors.black87,
-                fontWeight: FontWeight.w500),
+              fontSize: 14,
+              color: color ?? Colors.black87,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),

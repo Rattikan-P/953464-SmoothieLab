@@ -8,15 +8,21 @@ class NavigationProvider extends ChangeNotifier {
   List<int>? _pendingExtras;
   List<int>? _pendingVeggies;
   List<int>? _pendingHerbs;
+  List<int>? _pendingToppings;
   String? _pendingMenuName;   //   ชื่อเมนูที่เลือกมา (null = custom)
   String? _pendingMenuEmoji;  //   emoji ของเมนู
+  String? _pendingSize;
+  String? _pendingSweetness;
 
   List<int>? get pendingFruits  => _pendingFruits;
   List<int>? get pendingExtras  => _pendingExtras;
   List<int>? get pendingVeggies => _pendingVeggies;
-  List<int>? get pendingHerbs => _pendingHerbs;
+  List<int>? get pendingHerbs   => _pendingHerbs;
+  List<int>? get pendingToppings => _pendingToppings;
   String?    get pendingMenuName  => _pendingMenuName;
   String?    get pendingMenuEmoji => _pendingMenuEmoji;
+  String?    get pendingSize     => _pendingSize;
+  String?    get pendingSweetness => _pendingSweetness;
 
   int? _editingCartIndex;
   int? get editingCartIndex => _editingCartIndex;
@@ -31,17 +37,23 @@ class NavigationProvider extends ChangeNotifier {
     List<int> extrasIndexes = const [],
     List<int> veggieIndexes = const [],
     List<int> herbsIndexes = const [],
+    List<int> toppingsIndexes = const [],
     String? menuName,   //   ถ้ามาจากเมนู ส่งชื่อมาด้วย
     String? menuEmoji,
     int? editIndex,
+    String size = 'S',
+    String sweetness = 'หวานปกติ',
   }) {
-    _pendingFruits    = fruitIndexes;
-    _pendingExtras    = extrasIndexes;
-    _pendingVeggies   = veggieIndexes;
-    _pendingHerbs     = herbsIndexes;
-    _pendingMenuName  = menuName;
-    _pendingMenuEmoji = menuEmoji;
-    _editingCartIndex = editIndex;
+    _pendingFruits     = fruitIndexes;
+    _pendingExtras     = extrasIndexes;
+    _pendingVeggies    = veggieIndexes;
+    _pendingHerbs      = herbsIndexes;
+    _pendingToppings   = toppingsIndexes;
+    _pendingMenuName   = menuName;
+    _pendingMenuEmoji  = menuEmoji;
+    _pendingSize       = size;
+    _pendingSweetness  = sweetness;
+    _editingCartIndex  = editIndex;
     _currentIndex = 1;
     notifyListeners();
   }
@@ -51,8 +63,11 @@ class NavigationProvider extends ChangeNotifier {
     _pendingExtras    = null;
     _pendingVeggies   = null;
     _pendingHerbs     = null;
+    _pendingToppings  = null;
     _pendingMenuName  = null;
     _pendingMenuEmoji = null;
+    _pendingSize      = null;
+    _pendingSweetness = null;
   }
 
   void clearEditingIndex() {

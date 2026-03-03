@@ -113,6 +113,18 @@ class ToppingItem {
     required this.emoji,
     required this.price,
   });
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is ToppingItem &&
+        other.name == name &&
+        other.emoji == emoji &&
+        other.price == price;
+  }
+
+  @override
+  int get hashCode => name.hashCode ^ emoji.hashCode ^ price.hashCode;
 }
 
 /// ท้อปปิ้งที่เลือกได้

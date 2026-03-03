@@ -66,8 +66,11 @@ class _MainShellState extends State<MainShell> {
     final extras = nav.pendingExtras ?? [];
     final veggies = nav.pendingVeggies ?? [];
     final herbs = nav.pendingHerbs ?? [];
+    final toppings = nav.pendingToppings ?? [];
     final menuName = nav.pendingMenuName;
     final menuEmoji = nav.pendingMenuEmoji;
+    final size = nav.pendingSize ?? 'S';
+    final sweetness = nav.pendingSweetness ?? 'หวานปกติ';
 
     if (fruits != null) {
       setState(() {});
@@ -77,8 +80,11 @@ class _MainShellState extends State<MainShell> {
           extrasIndexes: extras,
           veggieIndexes: veggies,
           herbsIndexes: herbs,
+          toppingsIndexes: toppings,
           menuName: menuName,
           menuEmoji: menuEmoji,
+          size: size,
+          sweetness: sweetness,
         );
         nav.clearPendingPreset();
       });

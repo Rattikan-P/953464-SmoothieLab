@@ -329,8 +329,11 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
     List<int> extrasIndexes = const [],
     List<int> veggieIndexes = const [],
     List<int> herbsIndexes = const [],
+    List<int> toppingsIndexes = const [],
     String? menuName,
     String? menuEmoji,
+    String size = 'S',
+    String sweetness = 'หวานปกติ',
   }) {
     setState(() {
       _selectedIngredientsOrder.clear();
@@ -375,9 +378,43 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
         }
       }
 
+      // Process toppings indexes
       _toppings.clear();
-      _size = 'S';
-      _sweetnessIndex = 2;
+      for (final i in toppingsIndexes) {
+        if (i >= 0 && i < kToppingData.length) {
+          _toppings.add(i);
+        }
+      }
+
+      // Set size
+      _size = size;
+
+      // Set sweetness based on string
+      switch (sweetness) {
+        case 'ไม่หวาน':
+        case 'No sugar':
+          _sweetnessIndex = 0;
+          break;
+        case 'หวานน้อย':
+        case 'Less sugar':
+          _sweetnessIndex = 1;
+          break;
+        case 'หวานปกติ':
+        case 'Normal':
+          _sweetnessIndex = 2;
+          break;
+        case 'หวาน':
+        case 'Sweet':
+          _sweetnessIndex = 3;
+          break;
+        case 'หวานมาก':
+        case 'Extra sweet':
+          _sweetnessIndex = 4;
+          break;
+        default:
+          _sweetnessIndex = 2;
+      }
+
       _presetMenuName = menuName;
       _presetMenuEmoji = menuEmoji;
 
@@ -535,7 +572,22 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
     for (final i in _extras) t += kExtrasData[i].$3;
     for (final i in _veggies) t += kVeggiesData[i].$3;
     for (final i in _herbs) t += kHerbsData[i].$3;  // ✅ เพิ่ม herbs
-    for (final i in _toppings) t += kToppingItems[i].price;
+    for (final i in _toppings) t += kToppingData[i].price;
+
+    // เพิ่มราคาตามไซส์แก้ว (S: 0, M: +7, L: +15)
+    final sizeUpgrade = _size == 'L' ? 15.0 : (_size == 'M' ? 7.0 : 0.0);
+    t += sizeUpgrade;
+
+    return t;
+  }
+
+  // Calculate base price WITHOUT toppings (for cart)
+  double get _basePriceWithoutToppings {
+    double t = _base;
+    for (final i in _fruits) t += kFruitsData[i].$3;
+    for (final i in _extras) t += kExtrasData[i].$3;
+    for (final i in _veggies) t += kVeggiesData[i].$3;
+    for (final i in _herbs) t += kHerbsData[i].$3;
 
     // เพิ่มราคาตามไซส์แก้ว (S: 0, M: +7, L: +15)
     final sizeUpgrade = _size == 'L' ? 15.0 : (_size == 'M' ? 7.0 : 0.0);
@@ -1478,8 +1530,8 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: List.generate(kToppingItems.length, (i) {
-                      final t = kToppingItems[i];
+                    children: List.generate(kToppingData.length, (i) {
+                      final t = kToppingData[i];
                       final sel = _toppings.contains(i);
                       return FilterChip(
                         label: Row(
@@ -1577,7 +1629,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                             final newItem = SmoothieItem(
                               name: itemName,
                               emoji: itemEmoji,
-                              basePrice: _total / _sizeMultiplier,
+                              basePrice: _basePriceWithoutToppings / _sizeMultiplier,
                               ingredients: [
                                 ..._fruits.map((i) => kFruitsData[i].$2),
                                 ..._extras.map((i) => kExtrasData[i].$2),
@@ -1594,7 +1646,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                                 newItem,
                                 size: _size,
                                 toppings: _toppings
-                                    .map((i) => kToppingItems[i])
+                                    .map((i) => kToppingData[i])
                                     .toList(),
                                 sweetness: sweetness,
                                 fruitIndexes: _fruits.toList(),
@@ -1616,7 +1668,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                                 newItem,
                                 size: _size,
                                 toppings: _toppings
-                                    .map((i) => kToppingItems[i])
+                                    .map((i) => kToppingData[i])
                                     .toList(),
                                 sweetness: sweetness,
                                 isCustom:

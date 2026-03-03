@@ -204,15 +204,32 @@ class _CartItemCard extends StatelessWidget {
                         onTap: () {
                           final nav = context.read<NavigationProvider>();
                           Navigator.pop(context);
+
+                          // Convert ToppingItems to indexes
+                          final toppingIndexes = <int>[];
+                          for (final topping in item.toppings) {
+                            final index = kToppingData.indexWhere(
+                              (t) => t.name == topping.name &&
+                                    t.emoji == topping.emoji &&
+                                    t.price == topping.price,
+                            );
+                            if (index != -1) {
+                              toppingIndexes.add(index);
+                            }
+                          }
+
                           nav.goToLabWithPreset(
                             item.fruitIndexes,
                             extrasIndexes: item.extrasIndexes,
                             veggieIndexes: item.veggieIndexes,
                             herbsIndexes: item.herbsIndexes,
+                            toppingsIndexes: toppingIndexes,
                             menuName: item.isCustom ? null : item.smoothie.name,
                             menuEmoji:
                                 item.isCustom ? null : item.smoothie.emoji,
                             editIndex: index,
+                            size: item.size,
+                            sweetness: item.sweetness,
                           );
                         },
                         child: Container(

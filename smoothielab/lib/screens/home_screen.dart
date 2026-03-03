@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -6,6 +5,7 @@ import '../models/smoothie_item.dart';
 import '../providers/navigation_provider.dart';
 import '../widgets/floating_cart_button.dart';
 import '../widgets/smoothie_cup_widget.dart';
+import '../data/ingredients_data.dart';
 
 // ── Logo ──────────────────────────────────────────────
 class SmoothieLabLogo extends StatelessWidget {
@@ -47,61 +47,8 @@ class SmoothieLabLogo extends StatelessWidget {
 }
 
 // ── Preset data ───────────────────────────────────────
-class _Preset {
-  final String name, description, badge;
-  final double price;
-  final List<int> fruitIndexes;
-  final Color cupColor;
-  final List<String> fruits;
-  const _Preset({
-    required this.name,
-    required this.description,
-    required this.price,
-    required this.fruitIndexes,
-    required this.badge,
-    required this.cupColor,
-    required this.fruits,
-  });
-}
-
-const List<_Preset> _presets = [
-  _Preset(
-    name: 'Berry Blast',
-    description: 'Strawberry + Blueberry',
-    price: 55,
-    fruitIndexes: [0, 3],
-    badge: '🔥 Best Seller',
-    cupColor: Color(0xFFE91E8C),
-    fruits: ['🍓', '🫐'],
-  ),
-  _Preset(
-    name: 'Mango Tango',
-    description: 'Mango + Pineapple',
-    price: 55,
-    fruitIndexes: [1],
-    badge: '⭐ Popular',
-    cupColor: Color(0xFFFFB347),
-    fruits: ['🥭', '🍍', '🍋'],
-  ),
-  _Preset(
-    name: 'Green Power',
-    description: 'Spinach + Apple + Ginger',
-    price: 65,
-    fruitIndexes: [4, 5],
-    badge: '💚 Healthy',
-    cupColor: Color(0xFF66BB6A),
-    fruits: ['🥬', '🍏'],
-  ),
-  _Preset(
-    name: 'Banana Boost',
-    description: 'Banana + Milk',
-    price: 50,
-    fruitIndexes: [2],
-    badge: '💛 Classic',
-    cupColor: Color(0xFFFFD54F),
-    fruits: ['🍌', '🥛'],
-  ),
-];
+// Popular recipes (items with badges)
+final List<SmoothieItem> _popularItems = kMenuItems.where((item) => item.badge != null).toList();
 
 // ── Home Screen ───────────────────────────────────────
 class HomeScreen extends StatefulWidget {
@@ -138,8 +85,30 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   void _goToLab(SmoothieItem item) {
     HapticFeedback.lightImpact();
+    // Separate fruitIndexes into fruits, extras, veggies, herbs
+    final fruits = <int>[];
+    final extras = <int>[];
+    final veggies = <int>[];
+    final herbs = <int>[];
+
+    for (final i in item.fruitIndexes) {
+      if (i < kFruitsData.length) {
+        fruits.add(i);
+      } else if (i >= 30 && i <= 35) {
+        extras.add(i);
+      } else if (i >= 100 && i < 100 + kVeggiesData.length) {
+        veggies.add(i);
+      } else if (i >= 260 && i < 260 + kHerbsData.length) {
+        herbs.add(i);
+      }
+    }
+
+
     context.read<NavigationProvider>().goToLabWithPreset(
-      item.fruitIndexes,
+      fruits,
+      extrasIndexes: extras,
+      veggieIndexes: veggies,
+      herbsIndexes: herbs,
       menuName: item.name,
     );
   }
@@ -199,9 +168,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     scrollDirection: Axis.horizontal,
                     physics: const BouncingScrollPhysics(),
                     padding: const EdgeInsets.symmetric(horizontal: 20),
-                    itemCount: _presets.length,
+                    itemCount: _popularItems.length,
                     itemBuilder: (_, i) =>
-                        _PopularCard(preset: _presets[i], index: i),
+                        _PopularCard(item: _popularItems[i], index: i),
                   ),
                 ),
               ),
@@ -336,9 +305,9 @@ class _FilterPill extends StatelessWidget {
 
 // ── Popular Card ──────────────────────────────────────
 class _PopularCard extends StatefulWidget {
-  final _Preset preset;
+  final SmoothieItem item;
   final int index;
-  const _PopularCard({required this.preset, required this.index});
+  const _PopularCard({required this.item, required this.index});
   @override
   State<_PopularCard> createState() => _PopularCardState();
 }
@@ -368,9 +337,75 @@ class _PopularCardState extends State<_PopularCard>
     super.dispose();
   }
 
+  static (String, String, double)? _getIngredient(int index) {
+    // Check fruits
+    if (index < kFruitsData.length) {
+      return kFruitsData[index];
+    }
+    // Check veggies (offset by 100)
+    final veggieIndex = index - 100;
+    if (veggieIndex >= 0 && veggieIndex < kVeggiesData.length) {
+      return kVeggiesData[veggieIndex];
+    }
+    // Check extras (offset by 30)
+    final extraIndex = index - 30;
+    if (extraIndex >= 0 && extraIndex < kExtrasData.length) {
+      return kExtrasData[extraIndex];
+    }
+    // Check all extras range 30-35
+    if (index >= 30 && index <= 35) {
+      return kExtrasData[index - 30];
+    }
+    // Check herbs (offset by 260)
+    final herbIndex = index - 260;
+    if (herbIndex >= 0 && herbIndex < kHerbsData.length) {
+      return kHerbsData[herbIndex];
+    }
+    return null;
+  }
+
+  // Calculate blended color from all ingredient indexes
+  static Color _getBlendedColor(List<int> indexes) {
+    if (indexes.isEmpty) {
+      return const Color(0xFF4CAF50); // Default green
+    }
+
+    int r = 0, g = 0, b = 0;
+    int count = 0;
+
+    for (final i in indexes) {
+      final color = kIngredientColors[i];
+      if (color != null) {
+        r += color.red;
+        g += color.green;
+        b += color.blue;
+        count++;
+      }
+    }
+
+    if (count == 0) return const Color(0xFF4CAF50);
+
+    return Color.fromARGB(255, r ~/ count, g ~/ count, b ~/ count);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final p = widget.preset;
+    final item = widget.item;
+
+    // Compute blended cup color from all fruitIndexes
+    Color cupColor = _getBlendedColor(item.fruitIndexes);
+
+    // Get emojis from fruitIndexes
+    final fruits = <String>[];
+    for (final i in item.fruitIndexes) {
+      final ingredient = _getIngredient(i);
+      if (ingredient != null && !fruits.contains(ingredient.$1)) {
+        fruits.add(ingredient.$1);
+      }
+      if (fruits.length >= 3) break;
+    }
+    if (fruits.isEmpty) fruits.add(item.emoji);
+
     return GestureDetector(
       onTapDown: (_) {
         _ctrl.forward();
@@ -378,9 +413,30 @@ class _PopularCardState extends State<_PopularCard>
       },
       onTapUp: (_) {
         _ctrl.reverse();
+        // Separate fruitIndexes into fruits, extras, veggies, herbs
+        final fruits = <int>[];
+        final extras = <int>[];
+        final veggies = <int>[];
+        final herbs = <int>[];
+
+        for (final i in item.fruitIndexes) {
+          if (i < kFruitsData.length) {
+            fruits.add(i);
+          } else if (i >= 30 && i <= 35) {
+            extras.add(i);
+          } else if (i >= 100 && i < 100 + kVeggiesData.length) {
+            veggies.add(i);
+          } else if (i >= 260 && i < 260 + kHerbsData.length) {
+            herbs.add(i);
+          }
+        }
+
         context.read<NavigationProvider>().goToLabWithPreset(
-          p.fruitIndexes,
-          menuName: p.name,
+          fruits,
+          extrasIndexes: extras,
+          veggieIndexes: veggies,
+          herbsIndexes: herbs,
+          menuName: item.name,
         );
       },
       onTapCancel: () => _ctrl.reverse(),
@@ -394,7 +450,7 @@ class _PopularCardState extends State<_PopularCard>
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: p.cupColor.withOpacity(0.15),
+                color: cupColor.withOpacity(0.15),
                 blurRadius: 16,
                 offset: const Offset(0, 6),
               ),
@@ -412,15 +468,15 @@ class _PopularCardState extends State<_PopularCard>
               Container(
                 height: 110,
                 decoration: BoxDecoration(
-                  color: p.cupColor.withOpacity(0.08),
+                  color: cupColor.withOpacity(0.08),
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(24),
                   ),
                 ),
                 child: Center(
                   child: SmoothieCupWidget(
-                    cupColor: p.cupColor,
-                    fruits: p.fruits,
+                    cupColor: cupColor,
+                    fruits: fruits,
                     size: 76,
                   ),
                 ),
@@ -431,7 +487,7 @@ class _PopularCardState extends State<_PopularCard>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      p.name,
+                      item.name,
                       style: const TextStyle(
                         fontWeight: FontWeight.w800,
                         fontSize: 13,
@@ -442,7 +498,7 @@ class _PopularCardState extends State<_PopularCard>
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      p.description,
+                      item.description ?? item.ingredients.join(' + '),
                       style: const TextStyle(
                         color: Color(0xFF999999),
                         fontSize: 10,
@@ -454,31 +510,32 @@ class _PopularCardState extends State<_PopularCard>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '฿${p.price.toStringAsFixed(0)}',
+                          '฿${item.basePrice.toStringAsFixed(0)}',
                           style: const TextStyle(
                             color: Color(0xFFFF6B35),
                             fontWeight: FontWeight.w800,
                             fontSize: 13,
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: p.cupColor.withOpacity(0.12),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            p.badge,
-                            style: TextStyle(
-                              fontSize: 8,
-                              color: p.cupColor,
-                              fontWeight: FontWeight.w700,
+                        if (item.badge != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: cupColor.withOpacity(0.12),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              item.badge!,
+                              style: TextStyle(
+                                fontSize: 8,
+                                color: cupColor,
+                                fontWeight: FontWeight.w700,
+                              ),
                             ),
                           ),
-                        ),
                       ],
                     ),
                   ],
@@ -724,8 +781,8 @@ class _FormulaBannerState extends State<_FormulaBanner>
                       animation: _pop,
                       builder: (_, child) =>
                           Transform.scale(scale: _pop.value, child: child),
-                      child: const SmoothieCupWidget(
-                        cupColor: Color(0xFFFFB347),
+                      child: SmoothieCupWidget(
+                        cupColor: kIngredientColors[1] ?? const Color(0xFFFFB347),
                         fruits: ['🥭', '🍍', '🍋'],
                         size: 112,
                       ),
@@ -760,71 +817,66 @@ class _MenuCardState extends State<_MenuCard>
   late AnimationController _ctrl;
   late Animation<double> _scale;
 
-  static const Map<String, String> _emojiMap = {
-    'strawberry': '🍓',
-    'blueberry': '🫐',
-    'raspberry': '🍓',
-    'mango': '🥭',
-    'pineapple': '🍍',
-    'lime': '🍋',
-    'lemon': '🍋',
-    'banana': '🍌',
-    'milk': '🥛',
-    'oat': '🌾',
-    'orange': '🍊',
-    'kiwi': '🥝',
-    'cucumber': '🥒',
-    'spinach': '🥬',
-    'apple': '🍏',
-    'ginger': '🫚',
-    'peach': '🍑',
-    'apricot': '🍑',
-    'honey': '🍯',
-    'lychee': '🍈',
-    'coconut': '🥥',
-    'watermelon': '🍉',
-    'mint': '🌿',
-    'celery': '🥬',
-    'carrot': '🥕',
-  };
-
-  static const Map<String, Color> _colorMap = {
-    'strawberry': Color(0xFFE91E8C),
-    'blueberry': Color(0xFF5C6BC0),
-    'raspberry': Color(0xFFE91E8C),
-    'mango': Color(0xFFFFB347),
-    'pineapple': Color(0xFFFFCA28),
-    'banana': Color(0xFFFFD54F),
-    'orange': Color(0xFFFF7043),
-    'kiwi': Color(0xFF66BB6A),
-    'spinach': Color(0xFF43A047),
-    'apple': Color(0xFF66BB6A),
-    'peach': Color(0xFFFFAB91),
-    'apricot': Color(0xFFFFAB91),
-    'dragon fruit': Color(0xFFCE93D8),
-    'watermelon': Color(0xFFEF5350),
-    'passion fruit': Color(0xFFAB47BC),
-    'celery': Color(0xFF81C784),
-    'cucumber': Color(0xFF81C784),
-    'lychee': Color(0xFFFF80AB),
-  };
-
-  static List<String> _fruitsFor(List<String> ings) {
-    final e = <String>[];
-    for (final i in ings) {
-      final emoji = _emojiMap[i.toLowerCase()];
-      if (emoji != null && !e.contains(emoji)) e.add(emoji);
-      if (e.length >= 3) break;
+  static List<String> _fruitsForIndexes(List<int> indexes) {
+    final emojis = <String>[];
+    for (final i in indexes) {
+      final ingredient = _getIngredient(i);
+      if (ingredient != null && !emojis.contains(ingredient.$1)) {
+        emojis.add(ingredient.$1);
+      }
+      if (emojis.length >= 3) break;
     }
-    return e.isEmpty ? ['🍓'] : e;
+    return emojis.isEmpty ? ['🍓'] : emojis;
   }
 
-  static Color _colorFor(List<String> ings) {
-    for (final i in ings) {
-      final c = _colorMap[i.toLowerCase()];
-      if (c != null) return c;
+  static Color _colorForIndexes(List<int> indexes) {
+    if (indexes.isEmpty) {
+      return const Color(0xFF4CAF50);
     }
-    return const Color(0xFF4CAF50);
+
+    int r = 0, g = 0, b = 0;
+    int count = 0;
+
+    for (final i in indexes) {
+      final color = kIngredientColors[i];
+      if (color != null) {
+        r += color.red;
+        g += color.green;
+        b += color.blue;
+        count++;
+      }
+    }
+
+    if (count == 0) return const Color(0xFF4CAF50);
+
+    return Color.fromARGB(255, r ~/ count, g ~/ count, b ~/ count);
+  }
+
+  static (String, String, double)? _getIngredient(int index) {
+    // Check fruits
+    if (index < kFruitsData.length) {
+      return kFruitsData[index];
+    }
+    // Check veggies (offset by 100)
+    final veggieIndex = index - 100;
+    if (veggieIndex >= 0 && veggieIndex < kVeggiesData.length) {
+      return kVeggiesData[veggieIndex];
+    }
+    // Check extras (offset by 30)
+    final extraIndex = index - 30;
+    if (extraIndex >= 0 && extraIndex < kExtrasData.length) {
+      return kExtrasData[extraIndex];
+    }
+    // Check all extras range 30-35
+    if (index >= 30 && index <= 35) {
+      return kExtrasData[index - 30];
+    }
+    // Check herbs (offset by 260)
+    final herbIndex = index - 260;
+    if (herbIndex >= 0 && herbIndex < kHerbsData.length) {
+      return kHerbsData[herbIndex];
+    }
+    return null;
   }
 
   @override
@@ -848,7 +900,7 @@ class _MenuCardState extends State<_MenuCard>
 
   @override
   Widget build(BuildContext context) {
-    final color = _colorFor(widget.item.ingredients);
+    final color = _colorForIndexes(widget.item.fruitIndexes);
     return GestureDetector(
       onTapDown: (_) {
         _ctrl.forward();
@@ -890,7 +942,7 @@ class _MenuCardState extends State<_MenuCard>
                   child: Center(
                     child: SmoothieCupWidget(
                       cupColor: color,
-                      fruits: _fruitsFor(widget.item.ingredients),
+                      fruits: _fruitsForIndexes(widget.item.fruitIndexes),
                       size: 72,
                     ),
                   ),

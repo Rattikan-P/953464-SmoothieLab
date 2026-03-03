@@ -1,5 +1,7 @@
 // models/smoothie_item.dart
 
+import '../data/ingredients_data.dart';
+
 class SmoothieItem {
   final String name;
   final String emoji;
@@ -7,6 +9,8 @@ class SmoothieItem {
   final List<String> ingredients;
   final String category;
   final List<int> fruitIndexes;
+  final String? badge;
+  final String? description;
 
   const SmoothieItem({
     required this.name,
@@ -15,19 +19,13 @@ class SmoothieItem {
     required this.ingredients,
     required this.category,
     this.fruitIndexes = const [],
+    this.badge,
+    this.description,
   });
 }
 
-class ToppingItem {
-  final String name;
-  final String emoji;
-  final double price;
-  const ToppingItem({
-    required this.name,
-    required this.emoji,
-    required this.price,
-  });
-}
+// Export kToppingData from ingredients_data.dart
+const List<ToppingItem> kToppingItems = kToppingData;
 
 const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
@@ -37,6 +35,8 @@ const List<SmoothieItem> kMenuItems = [
     ingredients: ['Strawberry', 'Blueberry'],
     category: 'berry',
     fruitIndexes: [0, 3],
+    badge: '🔥 Best Seller',
+    description: 'Strawberry + Blueberry',
   ),
   SmoothieItem(
     name: 'Mango Tango',
@@ -44,71 +44,9 @@ const List<SmoothieItem> kMenuItems = [
     basePrice: 55,
     ingredients: ['Mango', 'Pineapple', 'Lime'],
     category: 'tropical',
-    fruitIndexes: [1],
-  ),
-  SmoothieItem(
-    name: 'Peach Fuzz',
-    emoji: '🍑',
-    basePrice: 58,
-    ingredients: ['Peach', 'Apricot', 'Honey'],
-    category: 'berry',
-    fruitIndexes: [5],
-  ),
-  SmoothieItem(
-    name: 'Banana Boost',
-    emoji: '🍌',
-    basePrice: 50,
-    ingredients: ['Banana', 'Milk', 'Oat'],
-    category: 'tropical',
-    fruitIndexes: [2],
-  ),
-  SmoothieItem(
-    name: 'Watermelon Wave',
-    emoji: '🍉',
-    basePrice: 52,
-    ingredients: ['Watermelon', 'Mint', 'Lime'],
-    category: 'berry',
-    fruitIndexes: [6],
-  ),
-  SmoothieItem(
-    name: 'Detox Green',
-    emoji: '🥒',
-    basePrice: 68,
-    ingredients: ['Celery', 'Cucumber', 'Kiwi', 'Lemon'],
-    category: 'green',
-    fruitIndexes: [4],
-  ),
-  SmoothieItem(
-    name: 'Green Go',
-    emoji: '🥝',
-    basePrice: 60,
-    ingredients: ['Kiwi', 'Cucumber'],
-    category: 'green',
-    fruitIndexes: [4],
-  ),
-  SmoothieItem(
-    name: 'Choco Dream',
-    emoji: '🍫',
-    basePrice: 65,
-    ingredients: ['Chocolate', 'Cocoa', 'Milk'],
-    category: 'green',
-    fruitIndexes: [],
-  ),
-  SmoothieItem(
-    name: 'Tropical Blast',
-    emoji: '🌴',
-    basePrice: 62,
-    ingredients: ['Pineapple', 'Mango', 'Orange'],
-    category: 'tropical',
-    fruitIndexes: [1],
-  ),
-  SmoothieItem(
-    name: 'Berry Dream',
-    emoji: '💜',
-    basePrice: 60,
-    ingredients: ['Blueberry', 'Raspberry'],
-    category: 'berry',
-    fruitIndexes: [0, 3],
+    fruitIndexes: [1, 7, 12],
+    badge: '⭐ Popular',
+    description: 'Mango + Pineapple + Lime',
   ),
   SmoothieItem(
     name: 'Green Power',
@@ -116,19 +54,76 @@ const List<SmoothieItem> kMenuItems = [
     basePrice: 65,
     ingredients: ['Spinach', 'Apple', 'Ginger', 'Lime'],
     category: 'green',
-    fruitIndexes: [4],
+    fruitIndexes: [100, 11, 261, 12], // Spinach(100+veggie), Apple(11), Ginger(261+herb), Lime(12)
+    badge: '💚 Healthy',
+    description: 'Spinach + Apple + Ginger + Lime',
   ),
-];
-
-const List<ToppingItem> kToppingItems = [
-  ToppingItem(name: 'Yogurt', emoji: '🥛', price: 15),
-  ToppingItem(name: 'Jelly', emoji: '🍮', price: 10),
-  ToppingItem(name: 'Tapioca Pearl', emoji: '⚫', price: 15),
-  ToppingItem(name: 'Whipped Cream', emoji: '🍦', price: 15),
-  ToppingItem(name: 'Chia Seeds', emoji: '🌱', price: 12),
-  ToppingItem(name: 'Granola', emoji: '🌾', price: 12),
-  ToppingItem(name: 'Honey', emoji: '🍯', price: 10),
-  ToppingItem(name: 'Almond', emoji: '🥜', price: 15),
+  SmoothieItem(
+    name: 'Banana Boost',
+    emoji: '🍌',
+    basePrice: 50,
+    ingredients: ['Banana', 'Milk', 'Oat'],
+    category: 'tropical',
+    fruitIndexes: [2, 30, 33], // Banana(2), Milk(0 extra+30), Oat(3 extra+30)
+    badge: '💛 Classic',
+    description: 'Banana + Milk + Oat',
+  ),
+  SmoothieItem(
+    name: 'Peach Fuzz',
+    emoji: '🍑',
+    basePrice: 58,
+    ingredients: ['Peach', 'Apricot', 'Honey'],
+    category: 'berry',
+    fruitIndexes: [5, 8, 262], // Peach(5), Apricot(8), Honey(262+herb)
+  ),
+  SmoothieItem(
+    name: 'Watermelon Wave',
+    emoji: '🍉',
+    basePrice: 52,
+    ingredients: ['Watermelon', 'Mint', 'Lime'],
+    category: 'berry',
+    fruitIndexes: [9, 260, 12], // Watermelon(9), Mint(260+herb), Lime(12)
+  ),
+  SmoothieItem(
+    name: 'Detox Green',
+    emoji: '🥒',
+    basePrice: 68,
+    ingredients: ['Celery', 'Cucumber', 'Kiwi', 'Lemon'],
+    category: 'green',
+    fruitIndexes: [103, 102, 4, 13], // Celery(103+veggie), Cucumber(102+veggie), Kiwi(4), Lemon(13)
+  ),
+  SmoothieItem(
+    name: 'Green Go',
+    emoji: '🥝',
+    basePrice: 60,
+    ingredients: ['Kiwi', 'Cucumber'],
+    category: 'green',
+    fruitIndexes: [4, 102], // Kiwi(4), Cucumber(102+veggie)
+  ),
+  SmoothieItem(
+    name: 'Choco Dream',
+    emoji: '🍫',
+    basePrice: 65,
+    ingredients: ['Chocolate', 'Cocoa', 'Milk'],
+    category: 'green',
+    fruitIndexes: [34, 35, 30], // Chocolate(4 extra+30), Cocoa(5 extra+30), Milk(0 extra+30)
+  ),
+  SmoothieItem(
+    name: 'Tropical Blast',
+    emoji: '🌴',
+    basePrice: 62,
+    ingredients: ['Pineapple', 'Mango', 'Orange'],
+    category: 'tropical',
+    fruitIndexes: [7, 1, 10],
+  ),
+  SmoothieItem(
+    name: 'Berry Dream',
+    emoji: '💜',
+    basePrice: 60,
+    ingredients: ['Blueberry', 'Raspberry'],
+    category: 'berry',
+    fruitIndexes: [3, 6],
+  ),
 ];
 
 const Map<String, double> kSizeMultiplier = {'S': 1.0, 'M': 1.3, 'L': 1.6};

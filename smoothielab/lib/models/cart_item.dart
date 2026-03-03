@@ -1,4 +1,5 @@
 import 'smoothie_item.dart';
+import '../data/ingredients_data.dart';
 
 class CartItem {
   final SmoothieItem smoothie;
@@ -10,6 +11,7 @@ class CartItem {
   final List<int> fruitIndexes;
   final List<int> extrasIndexes;
   final List<int> veggieIndexes;
+  final List<int> herbsIndexes;
 
   CartItem({
     required this.smoothie,
@@ -21,10 +23,12 @@ class CartItem {
     List<int>? fruitIndexes,
     List<int>? extrasIndexes,
     List<int>? veggieIndexes,
+    List<int>? herbsIndexes,
   })  : toppings = toppings ?? [],
         fruitIndexes = fruitIndexes ?? [],
         extrasIndexes = extrasIndexes ?? [],
-        veggieIndexes = veggieIndexes ?? [];
+        veggieIndexes = veggieIndexes ?? [],
+        herbsIndexes = herbsIndexes ?? [];
 
   String get displayName {
     if (!isCustom) return smoothie.name;

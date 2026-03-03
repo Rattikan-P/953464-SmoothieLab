@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import 'dart:async';
 import '../models/order_model.dart';
 import '../providers/cart_provider.dart';
+import '../data/ingredients_data.dart';
 
 class PaymentSuccessScreen extends StatefulWidget {
   const PaymentSuccessScreen({super.key});
@@ -70,7 +71,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
         ..menuName = item.smoothie.name
         ..menuEmoji = item.smoothie.emoji
         ..size = item.size
-        ..toppings = item.toppings.map((t) => t.name).toList()
+        ..toppings = item.toppings.map((ToppingItem t) => t.name).toList()
         ..totalPrice = item.itemPrice
         ..orderDate = DateTime.now()
         ..status = 'processing'

@@ -6,7 +6,7 @@ import '../providers/cart_provider.dart';
 import '../providers/navigation_provider.dart';
 import '../widgets/floating_cart_button.dart';
 import '../data/ingredients_data.dart';
-import '../widgets/cup_painter.dart';
+import '../widgets/smoothie_cup_widget.dart';
 
 
 class LabScreen extends StatefulWidget {
@@ -235,6 +235,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
   final Set<int> _fruits = {};
   final Set<int> _extras = {};
   final Set<int> _veggies = {};
+  final Set<int> _herbs = {};
   final Set<int> _toppings = {};
 
   // เก็บตำแหน่งของวัตถุดิบที่ลอยในแก้ว
@@ -267,6 +268,40 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
     );
   }
 
+  bool _hasLoadedPendingPreset = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_hasLoadedPendingPreset) {
+      _loadPendingPreset();
+      _hasLoadedPendingPreset = true;
+    }
+  }
+
+  void _loadPendingPreset() {
+    final nav = context.read<NavigationProvider>();
+    final pendingFruits = nav.pendingFruits;
+    final pendingExtras = nav.pendingExtras;
+    final pendingVeggies = nav.pendingVeggies;
+    final pendingHerbs = nav.pendingHerbs;
+
+    if (pendingFruits != null ||
+        pendingExtras != null ||
+        pendingVeggies != null ||
+        pendingHerbs != null) {
+      presetFruits(
+        pendingFruits ?? [],
+        extrasIndexes: pendingExtras ?? [],
+        veggieIndexes: pendingVeggies ?? [],
+        herbsIndexes: pendingHerbs ?? [],
+        menuName: nav.pendingMenuName,
+        menuEmoji: nav.pendingMenuEmoji,
+      );
+      nav.clearPendingPreset();
+    }
+  }
+
   @override
   void dispose() {
     _shakeController.dispose();
@@ -293,6 +328,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
     List<int> fruitIndexes, {
     List<int> extrasIndexes = const [],
     List<int> veggieIndexes = const [],
+    List<int> herbsIndexes = const [],
     String? menuName,
     String? menuEmoji,
   }) {
@@ -300,21 +336,43 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
       _selectedIngredientsOrder.clear();
 
       _fruits.clear();
-      _fruits.addAll(fruitIndexes);
-      for (final i in fruitIndexes) {
-        _addIngredientToOrder('fruit', i, kFruitsData);
-      }
-
       _extras.clear();
-      _extras.addAll(extrasIndexes);
-      for (final i in extrasIndexes) {
-        _addIngredientToOrder('extra', i, kExtrasData);
+      _veggies.clear();
+      _herbs.clear();
+
+      // Process fruit indexes (no offset)
+      for (final i in fruitIndexes) {
+        if (i < kFruitsData.length) {
+          _fruits.add(i);
+          _addIngredientToOrder('fruit', i, kFruitsData);
+        }
       }
 
-      _veggies.clear();
-      _veggies.addAll(veggieIndexes);
+      // Process extras indexes (offset 30)
+      for (final i in extrasIndexes) {
+        if (i >= 30 && i < 30 + kExtrasData.length) {
+          final adjustedIndex = i - 30;
+          _extras.add(adjustedIndex);
+          _addIngredientToOrder('extra', adjustedIndex, kExtrasData);
+        }
+      }
+
+      // Process veggie indexes (offset 100)
       for (final i in veggieIndexes) {
-        _addIngredientToOrder('veggie', i, kVeggiesData);
+        if (i >= 100 && i < 100 + kVeggiesData.length) {
+          final adjustedIndex = i - 100;
+          _veggies.add(adjustedIndex);
+          _addIngredientToOrder('veggie', adjustedIndex, kVeggiesData);
+        }
+      }
+
+      // Process herbs indexes (offset 260)
+      for (final i in herbsIndexes) {
+        if (i >= 260 && i < 260 + kHerbsData.length) {
+          final adjustedIndex = i - 260;
+          _herbs.add(adjustedIndex);
+          _addIngredientToOrder('herb', adjustedIndex, kHerbsData);
+        }
       }
 
       _toppings.clear();
@@ -331,8 +389,9 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
     setState(() {
       _fruits.clear();
       _extras.clear();
-      _toppings.clear();
       _veggies.clear();
+      _herbs.clear();
+      _toppings.clear();
       _size = 'S';
       _sweetnessIndex = 2;
       _presetMenuName = null;
@@ -366,6 +425,9 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
         break;
       case 'extra':
         dataList = kExtrasData;
+        break;
+      case 'herb':
+        dataList = kHerbsData;
         break;
       default:
         return;
@@ -472,6 +534,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
     for (final i in _fruits) t += kFruitsData[i].$3;
     for (final i in _extras) t += kExtrasData[i].$3;
     for (final i in _veggies) t += kVeggiesData[i].$3;
+    for (final i in _herbs) t += kHerbsData[i].$3;  // ✅ เพิ่ม herbs
     for (final i in _toppings) t += kToppingItems[i].price;
 
     // เพิ่มราคาตามไซส์แก้ว (S: 0, M: +7, L: +15)
@@ -487,6 +550,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
       ..._fruits,
       ..._extras,
       ..._veggies,
+      ..._herbs,
     ];
 
     if (allIndices.isEmpty) {
@@ -505,16 +569,26 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
     }
 
     for (final i in _extras) {
-      // extras ใช้สีครีม
-      r += 255;
-      g += 253;
-      b += 208;
+      // extras ใช้ index 30+
+      final color = kIngredientColors[30 + i] ?? Colors.brown;
+      r += color.red;
+      g += color.green;
+      b += color.blue;
       count++;
     }
 
     for (final i in _veggies) {
       // veggies ใช้ index 100+
       final color = kIngredientColors[100 + i] ?? Colors.green;
+      r += color.red;
+      g += color.green;
+      b += color.blue;
+      count++;
+    }
+
+    for (final i in _herbs) {
+      // herbs ใช้ index 260+
+      final color = kIngredientColors[260 + i] ?? Colors.green;
       r += color.red;
       g += color.green;
       b += color.blue;
@@ -528,11 +602,11 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
   (double, double) get _cupDimensions {
     switch (_size) {
       case 'S':
-        return (80.0, 120.0);
+        return (120.0, 170.0);
       case 'L':
-        return (110.0, 170.0);
+        return (150.0, 210.0);
       default:
-        return (95.0, 145.0); // M
+        return (135.0, 190.0); // M
     }
   }
 
@@ -748,23 +822,12 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                                       ),
                                     ],
                                   ),
-                                  child: CustomPaint(
-                                    painter: CupPainter(
-                                      cupWidth: _cupDimensions.$1,
-                                      cupHeight: _cupDimensions.$2,
-                                      liquidColor: _blendedColor,
-                                      hasIngredients: _fruits.isNotEmpty ||
-                                          _extras.isNotEmpty ||
-                                          _veggies.isNotEmpty,
-                                      strawLength: 1.0,
-                                    ),
-                                    child: SizedBox(
-                                      width: _cupDimensions.$1 + 40,
-                                      height: _cupDimensions.$2 + 50,
-                                      child: Stack(
-                                        children: _buildFloatingIngredients(),
-                                      ),
-                                    ),
+                                  child: SmoothieCupWidget(
+                                    cupColor: _blendedColor,
+                                    fruits: _selectedIngredientsOrder
+                                        .map((item) => item.emoji)
+                                        .toList(),
+                                    size: _cupDimensions.$1,
                                   ),
                                 ),
                               ),
@@ -835,6 +898,10 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                                     case 'extra':
                                       chipColor = Colors.amber.shade50;
                                       textColor = Colors.amber.shade700;
+                                      break;
+                                    case 'herb':
+                                      chipColor = Colors.lime.shade50;
+                                      textColor = Colors.lime.shade700;
                                       break;
                                     default:
                                       chipColor = Colors.grey.shade50;
@@ -1314,6 +1381,80 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
 
                   const SizedBox(height: 16),
 
+                  // ── Herbs ─────────────────────────────────
+                  const Text(
+                    '🌿 Herbs',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  ),
+                  const SizedBox(height: 8),
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          mainAxisSpacing: 8,
+                          crossAxisSpacing: 8,
+                          childAspectRatio: 1,
+                        ),
+                    itemCount: kHerbsData.length,
+                    itemBuilder: (_, i) {
+                      final d = kHerbsData[i];
+                      final sel = _herbs.contains(i);
+                      return GestureDetector(
+                        onTap: () {
+                          if (sel) {
+                            _herbs.remove(i);
+                            _removeIngredientFromOrder('herb', i);
+                          } else {
+                            _herbs.add(i);
+                            _addIngredientToOrder('herb', i, kHerbsData);
+                            _shakeCup();
+                          }
+                          setState(() {
+                            _updateIngredientPositions();
+                          });
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          decoration: BoxDecoration(
+                            color: sel ? const Color(0xFFE8F5E9) : Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: sel
+                                  ? Colors.green
+                                  : Colors.grey.shade200,
+                              width: sel ? 2 : 1,
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(d.$1, style: const TextStyle(fontSize: 26)),
+                              const SizedBox(height: 4),
+                              Text(d.$2, style: const TextStyle(fontSize: 11)),
+                              Text(
+                                '+฿${d.$3.toStringAsFixed(0)}',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Color(0xFFFF6B35),
+                                ),
+                              ),
+                              if (sel)
+                                const Icon(
+                                  Icons.check_circle,
+                                  color: Colors.green,
+                                  size: 14,
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+
+                  const SizedBox(height: 16),
+
                   // ── Toppings ───────────────────────────────────────
                   const Text(
                     '🍓 Toppings',
@@ -1389,7 +1530,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                         ),
                       ),
                       Text(
-                        '${_fruits.length + _extras.length + _veggies.length} items • Size $_size',
+                        '${_fruits.length + _extras.length + _veggies.length + _herbs.length} items • Size $_size',
                         style: const TextStyle(
                           color: Colors.grey,
                           fontSize: 11,
@@ -1443,8 +1584,9 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                                     .toList(),
                                 sweetness: sweetness,
                                 fruitIndexes: _fruits.toList(),
-                                extrasIndexes: _extras.toList(),
-                                veggieIndexes: _veggies.toList(),
+                                extrasIndexes: _extras.map((i) => i + 30).toList(),
+                                veggieIndexes: _veggies.map((i) => i + 100).toList(),
+                                herbsIndexes: _herbs.map((i) => i + 260).toList(),
                                 isCustom: !isFromMenu, // ✅
                               );
                               nav.clearEditingIndex();
@@ -1466,8 +1608,9 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                                 isCustom:
                                     !isFromMenu, // false ถ้าเป็นเมนูจาก list
                                 fruitIndexes: _fruits.toList(),
-                                extrasIndexes: _extras.toList(),
-                                veggieIndexes: _veggies.toList(),
+                                extrasIndexes: _extras.map((i) => i + 30).toList(),
+                                veggieIndexes: _veggies.map((i) => i + 100).toList(),
+                                herbsIndexes: _herbs.map((i) => i + 260).toList(),
                               );
                               // snackbar แสดงชื่อเมนูจริง
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -1487,8 +1630,9 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                             setState(() {
                               _fruits.clear();
                               _extras.clear();
-                              _toppings.clear();
                               _veggies.clear();
+                              _herbs.clear();
+                              _toppings.clear();
                               _ingredientPositions.clear();
                               _selectedIngredientsOrder.clear();
                               _size = 'S';

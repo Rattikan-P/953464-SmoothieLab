@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
 import '../providers/navigation_provider.dart';
+import '../data/ingredients_data.dart';
 import 'payment_screen.dart';
 
 class CartScreen extends StatelessWidget {
@@ -207,6 +208,7 @@ class _CartItemCard extends StatelessWidget {
                             item.fruitIndexes,
                             extrasIndexes: item.extrasIndexes,
                             veggieIndexes: item.veggieIndexes,
+                            herbsIndexes: item.herbsIndexes,
                             menuName: item.isCustom ? null : item.smoothie.name,
                             menuEmoji:
                                 item.isCustom ? null : item.smoothie.emoji,
@@ -249,7 +251,7 @@ class _CartItemCard extends StatelessWidget {
                       spacing: 4,
                       runSpacing: 4,
                       children: item.toppings
-                          .map((t) => Container(
+                          .map((ToppingItem t) => Container(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 7, vertical: 3),
                                 decoration: BoxDecoration(

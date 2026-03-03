@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/smoothie_item.dart';
 import '../models/cart_item.dart';
+import '../data/ingredients_data.dart';
 
 class CartProvider extends ChangeNotifier {
   final List<CartItem> _items = [];
@@ -42,6 +43,7 @@ class CartProvider extends ChangeNotifier {
     List<int>? fruitIndexes,
     List<int>? extrasIndexes,
     List<int>? veggieIndexes,
+    List<int>? herbsIndexes,
   }) {
     _items.add(
       CartItem(
@@ -53,6 +55,7 @@ class CartProvider extends ChangeNotifier {
         fruitIndexes: fruitIndexes ?? [],
         extrasIndexes: extrasIndexes ?? [],
         veggieIndexes: veggieIndexes ?? [],
+        herbsIndexes: herbsIndexes ?? [],
       ),
     );
     notifyListeners();
@@ -92,6 +95,7 @@ class CartProvider extends ChangeNotifier {
     required List<int> fruitIndexes,
     required List<int> extrasIndexes,
     required List<int> veggieIndexes,
+    required List<int> herbsIndexes,
     bool isCustom = true, // ✅ เพิ่ม
   }) {
     if (index < 0 || index >= _items.length) return;
@@ -105,6 +109,7 @@ class CartProvider extends ChangeNotifier {
       fruitIndexes: fruitIndexes,
       extrasIndexes: extrasIndexes,
       veggieIndexes: veggieIndexes,
+      herbsIndexes: herbsIndexes,
       quantity: oldQty,
     );
     notifyListeners();

@@ -65,6 +65,7 @@ class _MainShellState extends State<MainShell> {
     final fruits = nav.pendingFruits;
     final extras = nav.pendingExtras ?? [];
     final veggies = nav.pendingVeggies ?? [];
+    final herbs = nav.pendingHerbs ?? [];
     final menuName = nav.pendingMenuName;
     final menuEmoji = nav.pendingMenuEmoji;
 
@@ -75,6 +76,7 @@ class _MainShellState extends State<MainShell> {
           fruits,
           extrasIndexes: extras,
           veggieIndexes: veggies,
+          herbsIndexes: herbs,
           menuName: menuName,
           menuEmoji: menuEmoji,
         );

@@ -6,18 +6,23 @@ class CupPainter extends CustomPainter {
   final double cupHeight;
   final Color liquidColor;
   final bool hasIngredients;
+  final double strawLength; // 0.0 = สั้น, 1.0 = ยาวปกติ
 
   CupPainter({
     required this.cupWidth,
     required this.cupHeight,
     required this.liquidColor,
     required this.hasIngredients,
+    this.strawLength = 1.0,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final cx = size.width / 2;
     final topY = 0.0;
+
+    // วาดหลอดก่อน (อยู่ด้านหลังแก้ว)
+    _drawStraw(canvas, cx, topY);
 
     // เงาแก้ว
     canvas.save();
@@ -39,6 +44,62 @@ class CupPainter extends CustomPainter {
 
     // ขอบนอก
     _drawOutline(canvas, cx, topY);
+  }
+
+  void _drawStraw(Canvas canvas, double cx, double topY) {
+    // ความยาวหลอดปรับตามขนาดแก้ว (สั้นลง)
+    final baseStrawHeight = cupHeight * 0.5;
+    final strawHeight = baseStrawHeight * strawLength;
+    final strawWidth = 6.0;
+
+    // ตำแหน่งหลอด (เอียงนิดหน่อย)
+    final strawX = cx + cupWidth * 0.15;
+    final strawTopY = topY - strawHeight;
+    final strawBottomY = topY + cupHeight * 0.6;
+
+    // เงาหลอด
+    canvas.save();
+    canvas.translate(2, 2);
+    _drawSingleStraw(canvas, strawX + 2, strawTopY, strawBottomY, strawWidth,
+        Colors.black.withValues(alpha: 0.15));
+    canvas.restore();
+
+    // หลอดหลัก - สีแดงเข้ม
+    _drawSingleStraw(canvas, strawX, strawTopY, strawBottomY, strawWidth,
+        const Color(0xFFB71C1C)); // สีแดงเข้ม
+
+    // ลายขาว-แดงบนหลอด (ลดความสว่าง)
+    final stripePaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.5)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.5
+      ..strokeCap = StrokeCap.round;
+
+    // วาดลายขีดขาวบนหลอด
+    for (double y = strawTopY + 20; y < strawBottomY; y += 25) {
+      canvas.drawLine(
+        Offset(strawX - 2, y),
+        Offset(strawX + 2, y + 8),
+        stripePaint,
+      );
+    }
+  }
+
+  void _drawSingleStraw(Canvas canvas, double x, double topY, double bottomY,
+      double width, Color color) {
+    final strawPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    // วาดหลอดแบบเอียง
+    final path = Path()
+      ..moveTo(x - width / 2, topY)
+      ..lineTo(x + width / 2, topY)
+      ..lineTo(x + width / 2 + 3, bottomY)
+      ..lineTo(x - width / 2 + 3, bottomY)
+      ..close();
+
+    canvas.drawPath(path, strawPaint);
   }
 
   void _drawCupBody(Canvas canvas, double cx, double topY, Color color, bool isMain) {
@@ -214,5 +275,7 @@ class CupPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CupPainter old) =>
-      old.liquidColor != liquidColor || old.hasIngredients != hasIngredients;
+      old.liquidColor != liquidColor ||
+      old.hasIngredients != hasIngredients ||
+      old.strawLength != strawLength;
 }

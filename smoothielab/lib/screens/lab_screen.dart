@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/smoothie_item.dart';
@@ -14,11 +15,219 @@ class LabScreen extends StatefulWidget {
   State<LabScreen> createState() => LabScreenState();
 }
 
-class LabScreenState extends State<LabScreen> {
+// Widget สำหรับวัตถุดิบที่ลอยในแก้วพร้อม animation
+class _FloatingIngredient extends StatefulWidget {
+  final String emoji;
+  final double size;
+  final double rotation;
+  final int floatDuration;
+  final int floatDelay;
+
+  const _FloatingIngredient({
+    required this.emoji,
+    required this.size,
+    required this.rotation,
+    required this.floatDuration,
+    required this.floatDelay,
+  });
+
+  @override
+  State<_FloatingIngredient> createState() => _FloatingIngredientState();
+}
+
+class _FloatingIngredientState extends State<_FloatingIngredient>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _floatAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: Duration(milliseconds: widget.floatDuration),
+      vsync: this,
+    );
+
+    _floatAnimation = Tween<double>(begin: -3, end: 3).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOut,
+      ),
+    );
+
+    // เริ่ม animation หลังจาก delay
+    Future.delayed(Duration(milliseconds: widget.floatDelay), () {
+      if (mounted) {
+        _controller.repeat(reverse: true);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _floatAnimation,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, _floatAnimation.value),
+          child: Transform.rotate(
+            angle: widget.rotation,
+            child: child,
+          ),
+        );
+      },
+      child: Text(
+        widget.emoji,
+        style: TextStyle(
+          fontSize: widget.size,
+          height: 1.0,
+        ),
+      ),
+    );
+  }
+}
+
+// Widget สำหรับฟองอากาศ
+class _Bubble extends StatefulWidget {
+  final double startX;
+  final double startY;
+  final double endY;
+  final double size;
+
+  const _Bubble({
+    required this.startX,
+    required this.startY,
+    required this.endY,
+    required this.size,
+  });
+
+  @override
+  State<_Bubble> createState() => _BubbleState();
+}
+
+class _BubbleState extends State<_Bubble>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _opacityAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    final duration = 2000 + (widget.startX * 10).toInt();
+
+    _controller = AnimationController(
+      duration: Duration(milliseconds: duration),
+      vsync: this,
+    );
+
+    _animation = Tween<double>(begin: 0, end: 1).animate(_controller);
+
+    _scaleAnimation = Tween<double>(begin: 0.3, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+
+    _opacityAnimation = Tween<double>(begin: 0.6, end: 0.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+    );
+
+    // เริ่ม animation และ repeat เมื่อจบ
+    _controller.forward().then((_) {
+      if (mounted) {
+        _controller.reset();
+        _controller.forward().then((_) {
+          if (mounted) {
+            // สุ่มเวลา delay ก่อนเริ่มใหม่
+            Future.delayed(Duration(milliseconds: 500 + Random().nextInt(1000)), () {
+              if (mounted) {
+                _controller.reset();
+                _controller.forward();
+              }
+            });
+          }
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        final currentY = widget.startY + (widget.endY - widget.startY) * _animation.value;
+
+        return Positioned(
+          left: widget.startX + (currentY * 0.1).clamp(-5, 5),
+          top: currentY,
+          child: Opacity(
+            opacity: _opacityAnimation.value,
+            child: Transform.scale(
+              scale: _scaleAnimation.value,
+              child: Container(
+                width: widget.size,
+                height: widget.size,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.4),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.6),
+                    width: 1,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ข้อมูลตำแหน่งของวัตถุดิบแต่ละชิ้น
+class _IngredientPosition {
+  final String emoji;
+  final double x;
+  final double y;
+  final double rotation;
+  final double size;
+  final int floatDuration;
+
+  _IngredientPosition({
+    required this.emoji,
+    required this.x,
+    required this.y,
+    required this.rotation,
+    required this.size,
+    required this.floatDuration,
+  });
+}
+
+class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixin {
   final Set<int> _fruits = {};
   final Set<int> _extras = {};
   final Set<int> _veggies = {};
   final Set<int> _toppings = {};
+
+  // เก็บตำแหน่งของวัตถุดิบที่ลอยในแก้ว
+  final List<_IngredientPosition> _ingredientPositions = [];
+
+  // Animation controller สำหรับ shake effect
+  late AnimationController _shakeController;
+  Animation<double>? _shakeAnimation;
 
   String _size = 'S';
   int _sweetnessIndex = 2; // หวานปกติ default
@@ -26,6 +235,30 @@ class LabScreenState extends State<LabScreen> {
 
   String? _presetMenuName; // null = custom, มีค่า = เมนูจาก list
   String? _presetMenuEmoji;
+
+  @override
+  void initState() {
+    super.initState();
+    _shakeController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+
+    _shakeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _shakeController, curve: Curves.easeOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _shakeController.dispose();
+    super.dispose();
+  }
+
+  // Shake effect เมื่อเพิ่มวัตถุดิบ
+  void _shakeCup() {
+    _shakeController.forward(from: 0);
+  }
 
   double get _sizeMultiplier {
     switch (_size) {
@@ -60,6 +293,8 @@ class LabScreenState extends State<LabScreen> {
       _sweetnessIndex = 2;
       _presetMenuName = menuName;
       _presetMenuEmoji = menuEmoji;
+
+      _updateIngredientPositions();
     });
   }
 
@@ -73,13 +308,70 @@ class LabScreenState extends State<LabScreen> {
       _sweetnessIndex = 2;
       _presetMenuName = null;
       _presetMenuEmoji = null;
+      _ingredientPositions.clear();
     });
+  }
+
+  // อัปเดตตำแหน่งวัตถุดิบเมื่อมีการเปลี่ยนแปลง
+  void _updateIngredientPositions({bool forceRecalculate = false}) {
+    final allEmojis = [
+      ..._fruits.map((i) => kFruitsData[i].$1),
+      ..._extras.map((i) => kExtrasData[i].$1),
+      ..._veggies.map((i) => kVeggiesData[i].$1),
+    ];
+
+    final cupW = _cupDimensions.$1;
+    final cupH = _cupDimensions.$2;
+
+    // คำนวณตำแหน่งน้ำในแก้ว
+    final liquidTop = cupH - (cupH * 0.85) + 12;
+    final liquidBottom = cupH + 8;
+
+    // สร้างตำแหน่งใหม่สำหรับวัตถุดิบที่เพิ่มเข้ามา
+    final newPositions = <_IngredientPosition>[];
+
+    for (int i = 0; i < allEmojis.length; i++) {
+      // ถ้ามีตำแหน่งเดิมอยู่แล้วและไม่ได้บังคับคำนวณใหม่ ให้ใช้ตำแหน่งเดิม
+      if (!forceRecalculate && i < _ingredientPositions.length) {
+        newPositions.add(_ingredientPositions[i]);
+      } else {
+        // สร้างตำแหน่งใหม่
+        final random = Random(i * 17);
+
+        final randomX = 20 + random.nextDouble() * (cupW - 40);
+
+        final minY = liquidTop + 10;
+        final maxY = liquidBottom - 25;
+        final randomY = minY + random.nextDouble() * (maxY - minY);
+
+        final randomRotation = (random.nextDouble() * 50 - 25) * 3.14159 / 180;
+        final randomSize = 14 + random.nextDouble() * 8;
+        final floatDuration = 2000 + random.nextInt(2000);
+
+        newPositions.add(_IngredientPosition(
+          emoji: allEmojis[i],
+          x: randomX,
+          y: randomY,
+          rotation: randomRotation,
+          size: randomSize,
+          floatDuration: floatDuration,
+        ));
+      }
+    }
+
+    _ingredientPositions.clear();
+    _ingredientPositions.addAll(newPositions);
   }
 
   Widget _buildSizeButton(String size) {
     final isSelected = _size == size;
     return GestureDetector(
-      onTap: () => setState(() => _size = size),
+      onTap: () {
+        _size = size;
+        setState(() {
+          _updateIngredientPositions(forceRecalculate: true);
+        });
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -117,6 +409,129 @@ class LabScreenState extends State<LabScreen> {
     return t;
   }
 
+  // คำนวณสี blend จากวัตถุดิบที่เลือก
+  Color get _blendedColor {
+    final allIndices = [
+      ..._fruits,
+      ..._extras,
+      ..._veggies,
+    ];
+
+    if (allIndices.isEmpty) {
+      return const Color(0xFFE8F5E9); // สีเขียวอ่อน default
+    }
+
+    int r = 0, g = 0, b = 0;
+    int count = 0;
+
+    for (final i in _fruits) {
+      final color = kIngredientColors[i] ?? Colors.green;
+      r += color.red;
+      g += color.green;
+      b += color.blue;
+      count++;
+    }
+
+    for (final i in _extras) {
+      // extras ใช้สีครีม
+      r += 255;
+      g += 253;
+      b += 208;
+      count++;
+    }
+
+    for (final i in _veggies) {
+      // veggies ใช้ index 100+
+      final color = kIngredientColors[100 + i] ?? Colors.green;
+      r += color.red;
+      g += color.green;
+      b += color.blue;
+      count++;
+    }
+
+    return Color.fromARGB(255, r ~/ count, g ~/ count, b ~/ count);
+  }
+
+  // ขนาดแก้วตามไซส์
+  (double, double) get _cupDimensions {
+    switch (_size) {
+      case 'S':
+        return (80.0, 120.0);
+      case 'L':
+        return (110.0, 170.0);
+      default:
+        return (95.0, 145.0); // M
+    }
+  }
+
+  // สร้าง floating ingredients ในแก้ว
+  List<Widget> _buildFloatingIngredients() {
+    final widgets = <Widget>[];
+
+    // เพิ่ม bubbles ถ้ามีวัตถุดิบ
+    if (_ingredientPositions.isNotEmpty) {
+      final cupH = _cupDimensions.$2;
+      final liquidTop = cupH - (cupH * 0.85) + 12;
+
+      // สร้าง 5-8 bubbles
+      final bubbleCount = 5 + (_ingredientPositions.length % 4);
+      for (int i = 0; i < bubbleCount; i++) {
+        final random = Random(i * 23);
+        final startX = 20 + random.nextDouble() * (_cupDimensions.$1 - 40);
+        final startY = liquidTop + 20 + random.nextDouble() * 30;
+        final endY = liquidTop - 20 - random.nextDouble() * 20;
+        final size = 3.0 + random.nextDouble() * 5.0;
+
+        widgets.add(
+          KeyedSubtree(
+            key: ValueKey('bubble_${_ingredientPositions.length}_$i'),
+            child: _Bubble(
+              startX: startX,
+              startY: startY,
+              endY: endY,
+              size: size,
+            ),
+          ),
+        );
+      }
+    }
+
+    for (int i = 0; i < _ingredientPositions.length; i++) {
+      final pos = _ingredientPositions[i];
+
+      widgets.add(
+        Positioned(
+          key: ValueKey('ingredient_$i'),
+          left: pos.x + 10,
+          top: pos.y,
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: 1),
+            duration: Duration(milliseconds: 800 + i * 100),
+            curve: Curves.easeOut,
+            builder: (_, value, child) {
+              return Transform.translate(
+                offset: Offset(0, 15 * (1 - value)),
+                child: Opacity(
+                  opacity: value * 0.9,
+                  child: child,
+                ),
+              );
+            },
+            child: _FloatingIngredient(
+              emoji: pos.emoji,
+              size: pos.size,
+              rotation: pos.rotation,
+              floatDuration: pos.floatDuration,
+              floatDelay: i * 200,
+            ),
+          ),
+        ),
+      );
+    }
+
+    return widgets;
+  }
+
   @override
   Widget build(BuildContext context) {
     final cart = context.read<CartProvider>();
@@ -141,7 +556,7 @@ class LabScreenState extends State<LabScreen> {
         children: [
           // ── Formula preview ───────────────────────────────
           Container(
-            margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: Colors.white,
@@ -185,6 +600,49 @@ class LabScreenState extends State<LabScreen> {
             ),
           ),
 
+          // ── Cup Hero Section ──────────────────────────────
+          SizedBox(
+            height: 260,
+            child: Center(
+              child: AnimatedBuilder(
+                animation: _shakeAnimation ?? const AlwaysStoppedAnimation(0),
+                builder: (context, child) {
+                  if (_shakeAnimation == null) return child ?? const SizedBox();
+
+                  final shakeOffset = _shakeAnimation!.value < 0.5
+                      ? _shakeAnimation!.value * 10
+                      : (1 - _shakeAnimation!.value) * 10;
+
+                  return Transform.translate(
+                    offset: Offset(shakeOffset * 0.3, shakeOffset * 0.1),
+                    child: Transform.rotate(
+                      angle: shakeOffset * 0.02,
+                      child: child,
+                    ),
+                  );
+                },
+                child: CustomPaint(
+                  painter: CupPainter(
+                    cupWidth: _cupDimensions.$1,
+                    cupHeight: _cupDimensions.$2,
+                    liquidColor: _blendedColor,
+                    hasIngredients: _fruits.isNotEmpty ||
+                        _extras.isNotEmpty ||
+                        _veggies.isNotEmpty,
+                    strawLength: 1.0,
+                  ),
+                  child: SizedBox(
+                    width: _cupDimensions.$1 + 40,
+                    height: _cupDimensions.$2 + 50,
+                    child: Stack(
+                      children: _buildFloatingIngredients(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
           // ── Scrollable content ────────────────────────────
           Expanded(
             child: SingleChildScrollView(
@@ -210,7 +668,12 @@ class LabScreenState extends State<LabScreen> {
                           };
                           return Expanded(
                             child: GestureDetector(
-                              onTap: () => setState(() => _size = s),
+                              onTap: () {
+                                _size = s;
+                                setState(() {
+                                  _updateIngredientPositions(forceRecalculate: true);
+                                });
+                              },
                               child: Container(
                                 margin: const EdgeInsets.only(right: 8),
                                 padding: const EdgeInsets.symmetric(
@@ -366,12 +829,17 @@ class LabScreenState extends State<LabScreen> {
                           final d = kFruitsData[i];
                           final sel = _fruits.contains(i);
                           return GestureDetector(
-                            onTap: () => setState(() {
-                              if (sel)
+                            onTap: () {
+                              if (sel) {
                                 _fruits.remove(i);
-                              else
+                              } else {
                                 _fruits.add(i);
-                            }),
+                                _shakeCup();
+                              }
+                              setState(() {
+                                _updateIngredientPositions();
+                              });
+                            },
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
                               decoration: BoxDecoration(
@@ -446,12 +914,17 @@ class LabScreenState extends State<LabScreen> {
                           final d = kVeggiesData[i];
                           final sel = _veggies.contains(i);
                           return GestureDetector(
-                            onTap: () => setState(() {
-                              if (sel)
+                            onTap: () {
+                              if (sel) {
                                 _veggies.remove(i);
-                              else
+                              } else {
                                 _veggies.add(i);
-                            }),
+                                _shakeCup();
+                              }
+                              setState(() {
+                                _updateIngredientPositions();
+                              });
+                            },
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
                               decoration: BoxDecoration(
@@ -524,12 +997,17 @@ class LabScreenState extends State<LabScreen> {
                       final d = kExtrasData[i];
                       final sel = _extras.contains(i);
                       return GestureDetector(
-                        onTap: () => setState(() {
-                          if (sel)
+                        onTap: () {
+                          if (sel) {
                             _extras.remove(i);
-                          else
+                          } else {
                             _extras.add(i);
-                        }),
+                            _shakeCup();
+                          }
+                          setState(() {
+                            _updateIngredientPositions();
+                          });
+                        },
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
                           decoration: BoxDecoration(

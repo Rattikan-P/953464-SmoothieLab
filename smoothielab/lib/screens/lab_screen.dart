@@ -870,7 +870,9 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                       Expanded(
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
+                          physics: const BouncingScrollPhysics(),
                           child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               if (_selectedIngredientsOrder.isEmpty)
                                 Text(
@@ -909,14 +911,14 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                                   }
 
                                   return Container(
-                                    margin: const EdgeInsets.only(right: 5),
-                                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                                    margin: const EdgeInsets.only(right: 6),
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                     decoration: BoxDecoration(
                                       color: chipColor,
-                                      borderRadius: BorderRadius.circular(10),
+                                      borderRadius: BorderRadius.circular(12),
                                       border: Border.all(
                                         color: textColor.withValues(alpha: 0.2),
-                                        width: 0.8,
+                                        width: 1,
                                       ),
                                     ),
                                     child: Row(
@@ -924,13 +926,13 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                                       children: [
                                         Text(
                                           item.emoji,
-                                          style: const TextStyle(fontSize: 9),
+                                          style: const TextStyle(fontSize: 10),
                                         ),
-                                        const SizedBox(width: 2),
+                                        const SizedBox(width: 3),
                                         Text(
                                           item.name,
                                           style: TextStyle(
-                                            fontSize: 8,
+                                            fontSize: 9,
                                             color: textColor,
                                             fontWeight: FontWeight.w500,
                                           ),
@@ -939,6 +941,7 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                                     ),
                                   );
                                 }),
+                                const SizedBox(width: 8),
                               ],
                             ],
                           ),
@@ -1053,6 +1056,17 @@ class LabScreenState extends State<LabScreen> with SingleTickerProviderStateMixi
                                         color: sel ? Colors.green : Colors.grey,
                                       ),
                                     ),
+                                    if (s == 'S')
+                                      Text(
+                                        '฿0',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: sel
+                                              ? Colors.grey
+                                              : Colors.grey.shade600,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
                                     if (s == 'M' || s == 'L')
                                       Text(
                                         s == 'M' ? '+฿7' : '+฿15',

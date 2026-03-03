@@ -314,11 +314,11 @@ class LabScreenState extends State<LabScreen>
   double get _sizeMultiplier {
     switch (_size) {
       case 'S':
-        return 1.0;
+        return 0;
       case 'L':
-        return 1.6;
+        return 15;
       default:
-        return 1.3; // M
+        return 7; // M
     }
   }
 
@@ -1647,7 +1647,7 @@ class LabScreenState extends State<LabScreen>
                             final newItem = SmoothieItem(
                               name: itemName,
                               emoji: itemEmoji,
-                              basePrice: _basePriceWithoutToppings / _sizeMultiplier,
+                              basePrice: _basePriceWithoutToppings - _sizeMultiplier,
                               ingredients: [
                                 ..._fruits.map((i) => kFruitsData[i].$2),
                                 ..._extras.map((i) => kExtrasData[i].$2),

@@ -39,7 +39,7 @@ class CartItem {
   }
 
   double get itemPrice {
-    double base = smoothie.basePrice * kSizeMultiplier[size]!;
+    double base = smoothie.basePrice + kSizeUpgrade[size]!;
     double toppingTotal = toppings.fold(0, (sum, t) => sum + t.price);
     return (base + toppingTotal) * quantity;
   }

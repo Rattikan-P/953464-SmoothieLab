@@ -268,14 +268,14 @@ SmoothieItem _smoothieFromOrder(OrderModel order) {
     // custom smoothie — back-calculate basePrice จาก itemPriceRaw
     // itemPriceRaw = (basePrice * sizeMultiplier + toppingTotal) * qty
     // qty ของแต่ละ row ใน history = 1 เสมอ
-    // ดังนั้น: basePrice = (itemPriceRaw - toppingTotal) / sizeMultiplier
+    // ดังนั้น: basePrice = itemPriceRaw - sizeUpgrade - toppingTotal
     final toppings = order.toppings
         .map((name) => _findTopping(name))
         .whereType<ToppingItem>()
         .toList();
     final toppingTotal = toppings.fold(0.0, (s, t) => s + t.price);
-    final multiplier = kSizeMultiplier[order.size] ?? 1.3;
-    final basePrice = (order.itemPriceRaw - toppingTotal) / multiplier;
+    final sizeUpgrade = kSizeUpgrade[order.size] ?? 7;
+    final basePrice = order.itemPriceRaw - sizeUpgrade - toppingTotal;
 
     return SmoothieItem(
       name: order.menuName,

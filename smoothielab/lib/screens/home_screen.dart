@@ -364,6 +364,20 @@ class _PopularCardState extends State<_PopularCard>
     return null;
   }
 
+  // Calculate price from ingredient indexes
+  static double _calculatePrice(List<int> indexes, double basePrice) {
+    double total = basePrice; // Start with base price
+
+    for (final i in indexes) {
+      final ingredient = _getIngredient(i);
+      if (ingredient != null) {
+        total += ingredient.$3; // Add price of each ingredient
+      }
+    }
+
+    return total;
+  }
+
   // Calculate blended color from all ingredient indexes
   static Color _getBlendedColor(List<int> indexes) {
     if (indexes.isEmpty) {
@@ -510,7 +524,7 @@ class _PopularCardState extends State<_PopularCard>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          '฿${item.basePrice.toStringAsFixed(0)}',
+                          '฿${_calculatePrice(item.fruitIndexes, item.basePrice).toStringAsFixed(0)}',
                           style: const TextStyle(
                             color: Color(0xFFFF6B35),
                             fontWeight: FontWeight.w800,
@@ -879,6 +893,19 @@ class _MenuCardState extends State<_MenuCard>
     return null;
   }
 
+  static double _calculatePrice(List<int> indexes, double basePrice) {
+    double total = basePrice; // Start with base price
+
+    for (final i in indexes) {
+      final ingredient = _getIngredient(i);
+      if (ingredient != null) {
+        total += ingredient.$3; // Add price of each ingredient
+      }
+    }
+
+    return total;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -980,7 +1007,7 @@ class _MenuCardState extends State<_MenuCard>
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            '฿${widget.item.basePrice.toStringAsFixed(0)}',
+                            '฿${_calculatePrice(widget.item.fruitIndexes, widget.item.basePrice).toStringAsFixed(0)}',
                             style: const TextStyle(
                               color: Color(0xFFFF6B35),
                               fontWeight: FontWeight.w800,

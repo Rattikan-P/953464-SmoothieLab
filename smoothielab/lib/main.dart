@@ -114,7 +114,11 @@ class _MainShellState extends State<MainShell> {
       // floatingActionButton: navIndex == 1 ? null : const FloatingCartButton(),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: navIndex,
-        onTap: (i) => context.read<NavigationProvider>().goToTab(i),
+        onTap: (i) {
+          context.read<NavigationProvider>().goToTab(i);
+          // Clear editing index when switching tabs
+          context.read<NavigationProvider>().clearEditingIndex();
+        },
         type: BottomNavigationBarType.fixed,
         selectedItemColor: const Color(0xFF4CAF50),
         unselectedItemColor: Colors.grey,

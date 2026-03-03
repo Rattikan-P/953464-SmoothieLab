@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import 'dart:async';
 import '../models/order_model.dart';
 import '../providers/cart_provider.dart';
+import '../providers/navigation_provider.dart';
 import '../data/ingredients_data.dart';
 
 class PaymentSuccessScreen extends StatefulWidget {
@@ -54,6 +55,11 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
     _checkCtrl.forward();
     _saveOrder();
     _startProgress();
+
+    // Clear editing index when payment is complete
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<NavigationProvider>().clearEditingIndex();
+    });
   }
 
   void _startProgress() {

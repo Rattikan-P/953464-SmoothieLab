@@ -266,15 +266,10 @@ class LabScreenState extends State<LabScreen>
     ).animate(CurvedAnimation(parent: _shakeController, curve: Curves.easeOut));
   }
 
-  bool _hasLoadedPendingPreset = false;
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_hasLoadedPendingPreset) {
-      _loadPendingPreset();
-      _hasLoadedPendingPreset = true;
-    }
+    _loadPendingPreset();
   }
 
   void _loadPendingPreset() {
@@ -290,7 +285,10 @@ class LabScreenState extends State<LabScreen>
     if (pendingFruits != null ||
         pendingExtras != null ||
         pendingVeggies != null ||
-        pendingHerbs != null) {
+        pendingHerbs != null ||
+        pendingToppings != null ||
+        pendingSize != null ||
+        pendingSweetness != null) {
       presetFruits(
         pendingFruits ?? [],
         extrasIndexes: pendingExtras ?? [],
@@ -303,6 +301,9 @@ class LabScreenState extends State<LabScreen>
         sweetness: pendingSweetness ?? 'หวานปกติ',
       );
       nav.clearPendingPreset();
+    } else {
+      // ไม่มี preset ให้โหลด → ต้อง reset เพื่อให้ครั้งต่อไปไม่ค้างค่าเก่า
+      _resetSelection();
     }
   }
 

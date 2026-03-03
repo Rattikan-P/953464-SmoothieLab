@@ -547,10 +547,14 @@ class _SummaryPanel extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const PaymentScreen()),
-                ),
+                onPressed: () {
+                  // Clear editing index when going to payment
+                  context.read<NavigationProvider>().clearEditingIndex();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const PaymentScreen()),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFFF6B35),
                   foregroundColor: Colors.white,

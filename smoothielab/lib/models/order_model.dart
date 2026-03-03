@@ -36,4 +36,10 @@ class OrderModel extends HiveObject {
 
   @HiveField(10)
   late double vat;
+
+  @HiveField(11)
+  late List<String> ingredients; // เช่น ['🍓 Strawberry', '🫐 Blueberry']
+
+  @HiveField(12)
+  late String sweetness;
 }

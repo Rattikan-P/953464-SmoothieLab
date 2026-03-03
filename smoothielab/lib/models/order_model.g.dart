@@ -2,6 +2,10 @@
 
 part of 'order_model.dart';
 
+// **************************************************************************
+// TypeAdapterGenerator
+// **************************************************************************
+
 class OrderModelAdapter extends TypeAdapter<OrderModel> {
   @override
   final int typeId = 0;
@@ -23,13 +27,15 @@ class OrderModelAdapter extends TypeAdapter<OrderModel> {
       ..status = fields[7] as String
       ..subtotal = fields[8] as double
       ..discount = fields[9] as double
-      ..vat = fields[10] as double;
+      ..vat = fields[10] as double
+      ..ingredients = (fields[11] as List).cast<String>()
+      ..sweetness = fields[12] as String;
   }
 
   @override
   void write(BinaryWriter writer, OrderModel obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(13)
       ..writeByte(0)
       ..write(obj.orderId)
       ..writeByte(1)
@@ -51,8 +57,15 @@ class OrderModelAdapter extends TypeAdapter<OrderModel> {
       ..writeByte(9)
       ..write(obj.discount)
       ..writeByte(10)
-      ..write(obj.vat);
+      ..write(obj.vat)
+      ..writeByte(11)
+      ..write(obj.ingredients)
+      ..writeByte(12)
+      ..write(obj.sweetness);
   }
+
+  @override
+  int get hashCode => typeId.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -60,7 +73,4 @@ class OrderModelAdapter extends TypeAdapter<OrderModel> {
       other is OrderModelAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
-
-  @override
-  int get hashCode => typeId.hashCode;
 }

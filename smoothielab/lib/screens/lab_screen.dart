@@ -4,35 +4,9 @@ import '../models/smoothie_item.dart';
 import '../providers/cart_provider.dart';
 import '../providers/navigation_provider.dart';
 import '../widgets/floating_cart_button.dart';
+import '../data/ingredients_data.dart';
+import '../widgets/cup_painter.dart';
 
-const _fruitsData = [
-  ('🍓', 'สตรอว์เบอร์รี่', 15.0),
-  ('🥭', 'มะม่วง', 12.0),
-  ('🍌', 'กล้วย', 8.0),
-  ('💜', 'บลูเบอร์รี่', 18.0),
-  ('🥝', 'กีวี', 15.0),
-  ('🍑', 'พีช', 14.0),
-];
-
-const _veggiesData = <(String, String, double)>[
-  ('🥬', 'ผักโขม', 10.0),
-  ('🥦', 'บร็อคโคลี่', 12.0),
-  // เพิ่มได้เลยค่ะ
-];
-
-const _extrasData = [
-  ('🥛', 'นม', 10.0),
-  ('🥥', 'กะทิ', 12.0),
-  ('🧃', 'น้ำผลไม้', 8.0),
-];
-
-const _sweetnessLevels = [
-  ('🚫', 'ไม่หวาน'),
-  ('🌿', 'หวานน้อย'),
-  ('😊', 'หวานปกติ'),
-  ('🍓', 'หวานมาก'),
-  ('🤩', 'หวานสุด'),
-];
 
 class LabScreen extends StatefulWidget {
   const LabScreen({super.key});
@@ -46,7 +20,7 @@ class LabScreenState extends State<LabScreen> {
   final Set<int> _veggies = {};
   final Set<int> _toppings = {};
 
-  String _size = 'M';
+  String _size = 'S';
   int _sweetnessIndex = 2; // หวานปกติ default
   static const double _base = 25;
 
@@ -82,20 +56,64 @@ class LabScreenState extends State<LabScreen> {
       _veggies.addAll(veggieIndexes);
 
       _toppings.clear();
-      _size = 'M';
+      _size = 'S';
       _sweetnessIndex = 2;
       _presetMenuName = menuName;
       _presetMenuEmoji = menuEmoji;
     });
   }
 
+  void _resetSelection() {
+    setState(() {
+      _fruits.clear();
+      _extras.clear();
+      _toppings.clear();
+      _veggies.clear();
+      _size = 'S';
+      _sweetnessIndex = 2;
+      _presetMenuName = null;
+      _presetMenuEmoji = null;
+    });
+  }
+
+  Widget _buildSizeButton(String size) {
+    final isSelected = _size == size;
+    return GestureDetector(
+      onTap: () => setState(() => _size = size),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? const Color(0xFF4CAF50) : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF4CAF50) : Colors.grey.shade300,
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Text(
+          size,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Colors.grey.shade700,
+            fontWeight: FontWeight.bold,
+            fontSize: 13,
+          ),
+        ),
+      ),
+    );
+  }
+
   double get _total {
     double t = _base;
-    for (final i in _fruits) t += _fruitsData[i].$3;
-    for (final i in _extras) t += _extrasData[i].$3;
-    for (final i in _veggies) t += _veggiesData[i].$3;
+    for (final i in _fruits) t += kFruitsData[i].$3;
+    for (final i in _extras) t += kExtrasData[i].$3;
+    for (final i in _veggies) t += kVeggiesData[i].$3;
     for (final i in _toppings) t += kToppingItems[i].price;
-    t *= _sizeMultiplier;
+
+    // เพิ่มราคาตามไซส์แก้ว (S: 0, M: +7, L: +15)
+    final sizeUpgrade = _size == 'L' ? 15.0 : (_size == 'M' ? 7.0 : 0.0);
+    t += sizeUpgrade;
+
     return t;
   }
 
@@ -148,7 +166,7 @@ class LabScreenState extends State<LabScreen> {
                       Text(
                         _fruits.isEmpty
                             ? '—'
-                            : _fruits.map((i) => _fruitsData[i].$2).join(' + '),
+                            : _fruits.map((i) => kFruitsData[i].$2).join(' + '),
                         style: const TextStyle(fontWeight: FontWeight.bold),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -161,14 +179,6 @@ class LabScreenState extends State<LabScreen> {
                         ),
                       ),
                     ],
-                  ),
-                ),
-                Text(
-                  '฿${_total.toStringAsFixed(0)}',
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF4CAF50),
                   ),
                 ),
               ],
@@ -204,7 +214,8 @@ class LabScreenState extends State<LabScreen> {
                               child: Container(
                                 margin: const EdgeInsets.only(right: 8),
                                 padding: const EdgeInsets.symmetric(
-                                  vertical: 12,
+                                  vertical: 8,
+                                  horizontal: 4,
                                 ),
                                 decoration: BoxDecoration(
                                   color: sel
@@ -252,6 +263,17 @@ class LabScreenState extends State<LabScreen> {
                                         color: sel ? Colors.green : Colors.grey,
                                       ),
                                     ),
+                                    if (s == 'M' || s == 'L')
+                                      Text(
+                                        s == 'M' ? '+฿7' : '+฿15',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: sel
+                                              ? Colors.orange
+                                              : Colors.orange.shade700,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                                   ],
                                 ),
                               ),
@@ -271,7 +293,7 @@ class LabScreenState extends State<LabScreen> {
                   ),
                   const SizedBox(height: 8),
                   Row(
-                    children: List.generate(_sweetnessLevels.length, (i) {
+                    children: List.generate(kSweetnessLevels.length, (i) {
                       final sel = _sweetnessIndex == i;
                       return Expanded(
                         child: GestureDetector(
@@ -294,12 +316,12 @@ class LabScreenState extends State<LabScreen> {
                             child: Column(
                               children: [
                                 Text(
-                                  _sweetnessLevels[i].$1,
+                                  kSweetnessLevels[i].$1,
                                   style: const TextStyle(fontSize: 18),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  _sweetnessLevels[i].$2,
+                                  kSweetnessLevels[i].$2,
                                   style: TextStyle(
                                     fontSize: 9,
                                     color: sel
@@ -339,9 +361,9 @@ class LabScreenState extends State<LabScreen> {
                           crossAxisSpacing: 8,
                           childAspectRatio: 1,
                         ),
-                        itemCount: _fruitsData.length,
+                        itemCount: kFruitsData.length,
                         itemBuilder: (_, i) {
-                          final d = _fruitsData[i];
+                          final d = kFruitsData[i];
                           final sel = _fruits.contains(i);
                           return GestureDetector(
                             onTap: () => setState(() {
@@ -419,9 +441,9 @@ class LabScreenState extends State<LabScreen> {
                           crossAxisSpacing: 8,
                           childAspectRatio: 1,
                         ),
-                        itemCount: _veggiesData.length,
+                        itemCount: kVeggiesData.length,
                         itemBuilder: (_, i) {
-                          final d = _veggiesData[i];
+                          final d = kVeggiesData[i];
                           final sel = _veggies.contains(i);
                           return GestureDetector(
                             onTap: () => setState(() {
@@ -497,9 +519,9 @@ class LabScreenState extends State<LabScreen> {
                           crossAxisSpacing: 8,
                           childAspectRatio: 1,
                         ),
-                    itemCount: _extrasData.length,
+                    itemCount: kExtrasData.length,
                     itemBuilder: (_, i) {
-                      final d = _extrasData[i];
+                      final d = kExtrasData[i];
                       final sel = _extras.contains(i);
                       return GestureDetector(
                         onTap: () => setState(() {
@@ -608,14 +630,31 @@ class LabScreenState extends State<LabScreen> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      Text(
+                        '${_fruits.length + _extras.length + _veggies.length} รายการ • ไซส์ $_size',
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 11,
+                        ),
+                      ),
                     ],
                   ),
-                  ElevatedButton(
+                  Row(
+                    children: [
+                      // ปุ่มถังขยะ
+                      IconButton(
+                        onPressed: _resetSelection,
+                        icon: const Icon(Icons.delete_outline),
+                        color: Colors.grey.shade600,
+                        tooltip: 'ล้างทั้งหมด',
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
                     onPressed: (_fruits.isEmpty && _veggies.isEmpty)
                         ? null
                         : () {
                             final sweetness =
-                                _sweetnessLevels[_sweetnessIndex].$2;
+                                kSweetnessLevels[_sweetnessIndex].$2;
 
                             // ถ้ามาจากเมนู ใช้ชื่อและ emoji เมนูนั้น
                             final isFromMenu = _presetMenuName != null;
@@ -627,9 +666,9 @@ class LabScreenState extends State<LabScreen> {
                               emoji: itemEmoji,
                               basePrice: _total / _sizeMultiplier,
                               ingredients: [
-                                ..._fruits.map((i) => _fruitsData[i].$2),
-                                ..._extras.map((i) => _extrasData[i].$2),
-                                ..._veggies.map((i) => _veggiesData[i].$2),
+                                ..._fruits.map((i) => kFruitsData[i].$2),
+                                ..._extras.map((i) => kExtrasData[i].$2),
+                                ..._veggies.map((i) => kVeggiesData[i].$2),
                               ],
                               category: 'green',
                             );
@@ -716,6 +755,8 @@ class LabScreenState extends State<LabScreen> {
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
+                ],
+              ),
                 ],
               ),
             ),

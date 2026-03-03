@@ -46,4 +46,21 @@ class OrderModel extends HiveObject {
   /// ใช้สำหรับ Order Again เพื่อ reconstruct CartItem ได้ราคาถูกต้อง
   @HiveField(13)
   late double itemPriceRaw;
+
+  // Ingredient indexes for editing
+  @HiveField(14)
+  List<int> fruitIndexes = [];
+
+  @HiveField(15)
+  List<int> extrasIndexes = [];
+
+  @HiveField(16)
+  List<int> veggieIndexes = [];
+
+  @HiveField(17)
+  List<int> herbsIndexes = [];
+
+  // Topping indexes for editing
+  @HiveField(18)
+  List<int> toppingsIndexes = [];
 }

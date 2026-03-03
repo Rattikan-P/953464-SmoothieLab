@@ -78,6 +78,19 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
     final cart = context.read<CartProvider>();
     final box = Hive.box<OrderModel>('orders');
     for (final item in cart.items) {
+      // Convert ToppingItems to indexes for editing
+      final toppingIndexes = <int>[];
+      for (final topping in item.toppings) {
+        final index = kToppingData.indexWhere(
+          (t) => t.name == topping.name &&
+                t.emoji == topping.emoji &&
+                t.price == topping.price,
+        );
+        if (index != -1) {
+          toppingIndexes.add(index);
+        }
+      }
+
       final order = OrderModel()
         ..orderId = _orderId
         ..menuName = item.smoothie.name
@@ -92,7 +105,12 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
         ..discount = cart.discount
         ..vat = cart.vat
         ..ingredients = item.smoothie.ingredients
-        ..sweetness = item.sweetness;
+        ..sweetness = item.sweetness
+        ..fruitIndexes = item.fruitIndexes
+        ..extrasIndexes = item.extrasIndexes
+        ..veggieIndexes = item.veggieIndexes
+        ..herbsIndexes = item.herbsIndexes
+        ..toppingsIndexes = toppingIndexes;
       await box.add(order);
     }
     cart.clear();

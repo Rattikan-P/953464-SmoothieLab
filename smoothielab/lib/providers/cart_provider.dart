@@ -44,6 +44,7 @@ class CartProvider extends ChangeNotifier {
     List<int>? extrasIndexes,
     List<int>? veggieIndexes,
     List<int>? herbsIndexes,
+    List<int>? toppingsIndexes,
   }) {
     _items.add(
       CartItem(
@@ -56,6 +57,7 @@ class CartProvider extends ChangeNotifier {
         extrasIndexes: extrasIndexes ?? [],
         veggieIndexes: veggieIndexes ?? [],
         herbsIndexes: herbsIndexes ?? [],
+        toppingsIndexes: toppingsIndexes ?? [],
       ),
     );
     notifyListeners();

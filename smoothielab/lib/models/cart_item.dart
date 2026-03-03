@@ -12,6 +12,7 @@ class CartItem {
   final List<int> extrasIndexes;
   final List<int> veggieIndexes;
   final List<int> herbsIndexes;
+  final List<int> toppingsIndexes;
 
   CartItem({
     required this.smoothie,
@@ -24,11 +25,13 @@ class CartItem {
     List<int>? extrasIndexes,
     List<int>? veggieIndexes,
     List<int>? herbsIndexes,
+    List<int>? toppingsIndexes,
   }) : toppings = toppings ?? [],
        fruitIndexes = fruitIndexes ?? [],
        extrasIndexes = extrasIndexes ?? [],
        veggieIndexes = veggieIndexes ?? [],
-       herbsIndexes = herbsIndexes ?? [];
+       herbsIndexes = herbsIndexes ?? [],
+       toppingsIndexes = toppingsIndexes ?? [];
 
   String get displayName {
     if (!isCustom) return smoothie.name;

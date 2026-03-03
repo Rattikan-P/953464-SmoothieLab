@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../models/order_model.dart';
 import '../models/smoothie_item.dart';
-import '../models/cart_item.dart';
 import '../data/ingredients_data.dart';
 import '../providers/cart_provider.dart';
 import '../widgets/floating_cart_button.dart';
@@ -298,6 +297,13 @@ void _orderAgain(BuildContext context, List<OrderModel> orders) {
         .whereType<ToppingItem>()
         .toList();
 
+    // Use indexes directly from OrderModel (saved during payment)
+    // These already include the proper offsets
+    final fruitIndexes = order.fruitIndexes;
+    final extrasIndexes = order.extrasIndexes;
+    final veggieIndexes = order.veggieIndexes;
+    final herbsIndexes = order.herbsIndexes;
+
     final isCustom = !kMenuItems.any(
       (m) => m.name == order.menuName && m.emoji == order.menuEmoji,
     );
@@ -308,6 +314,11 @@ void _orderAgain(BuildContext context, List<OrderModel> orders) {
       toppings: toppings,
       sweetness: order.sweetness,
       isCustom: isCustom,
+      fruitIndexes: fruitIndexes,
+      extrasIndexes: extrasIndexes,
+      veggieIndexes: veggieIndexes,
+      herbsIndexes: herbsIndexes,
+      toppingsIndexes: order.toppingsIndexes,
     );
   }
 

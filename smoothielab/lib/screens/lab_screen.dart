@@ -1695,6 +1695,7 @@ class LabScreenState extends State<LabScreen>
                                 extrasIndexes: _extras.map((i) => i + 30).toList(),
                                 veggieIndexes: _veggies.map((i) => i + 100).toList(),
                                 herbsIndexes: _herbs.map((i) => i + 260).toList(),
+                                toppingsIndexes: _toppings.toList(),
                               );
                               // snackbar แสดงชื่อเมนูจริง
                               ScaffoldMessenger.of(context).showSnackBar(

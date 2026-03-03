@@ -84,7 +84,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
         ..menuEmoji = item.smoothie.emoji
         ..size = item.size
         ..toppings = item.toppings.map((t) => t.name).toList()
-        ..totalPrice = item.itemPrice
+        ..totalPrice = (item.itemPrice / cart.subtotal) * cart.total
         ..orderDate = DateTime.now()
         ..status = 'processing'
         ..subtotal = cart.subtotal

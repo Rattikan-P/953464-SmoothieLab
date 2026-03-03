@@ -17,7 +17,7 @@ class OrderModel extends HiveObject {
   late String size;
 
   @HiveField(4)
-  late List<String> toppings;
+  List<String> toppings = [];
 
   @HiveField(5)
   late double totalPrice;
@@ -38,7 +38,7 @@ class OrderModel extends HiveObject {
   late double vat;
 
   @HiveField(11)
-  late List<String> ingredients; // เช่น ['🍓 Strawberry', '🫐 Blueberry']
+  List<String> ingredients = []; // เช่น ['🍓 Strawberry', '🫐 Blueberry']
 
   @HiveField(12)
   late String sweetness;

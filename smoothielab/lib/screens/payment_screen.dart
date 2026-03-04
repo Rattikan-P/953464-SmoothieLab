@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'dart:async';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:uuid/uuid.dart';
 import '../providers/cart_provider.dart';
+import '../models/order_model.dart';
+import '../data/ingredients_data.dart';
 import 'payment_success_screen.dart';
 
 class PaymentScreen extends StatefulWidget {
@@ -38,6 +42,49 @@ class _PaymentScreenState extends State<PaymentScreen> {
     super.dispose();
   }
 
+  Future<void> _saveExpiredOrder() async {
+    final cart = context.read<CartProvider>();
+    final box = await Hive.openBox<OrderModel>('orders');
+    final orderId = '#SML-${const Uuid().v4().substring(0, 4).toUpperCase()}';
+
+    for (final item in cart.items) {
+      // Convert ToppingItems to indexes for editing
+      final toppingIndexes = <int>[];
+      for (final topping in item.toppings) {
+        final index = kToppingData.indexWhere(
+          (t) => t.name == topping.name &&
+                t.emoji == topping.emoji &&
+                t.price == topping.price,
+        );
+        if (index != -1) {
+          toppingIndexes.add(index);
+        }
+      }
+
+      final order = OrderModel()
+        ..orderId = orderId
+        ..menuName = item.smoothie.name
+        ..menuEmoji = item.smoothie.emoji
+        ..size = item.size
+        ..toppings = item.toppings.map((t) => t.name).toList()
+        ..totalPrice = (item.itemPrice / cart.subtotal) * cart.total
+        ..itemPriceRaw = item.itemPrice
+        ..orderDate = DateTime.now()
+        ..status = 'cancelled'
+        ..subtotal = cart.subtotal
+        ..discount = cart.discount
+        ..vat = cart.vat
+        ..ingredients = item.smoothie.ingredients
+        ..sweetness = item.sweetness
+        ..fruitIndexes = item.fruitIndexes
+        ..extrasIndexes = item.extrasIndexes
+        ..veggieIndexes = item.veggieIndexes
+        ..herbsIndexes = item.herbsIndexes
+        ..toppingsIndexes = toppingIndexes;
+      await box.add(order);
+    }
+  }
+
   Future<void> _showExpiredDialog() async {
     if (!mounted) return;
     await showDialog(
@@ -63,9 +110,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
+                // Save the order as cancelled before clearing cart
+                await _saveExpiredOrder();
                 context.read<CartProvider>().clear();
-                Navigator.of(context)..pop()..pop();
+                if (mounted) {
+                  // Pop dialog and payment screen
+                  Navigator.of(context)..pop()..pop();
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red.shade400,

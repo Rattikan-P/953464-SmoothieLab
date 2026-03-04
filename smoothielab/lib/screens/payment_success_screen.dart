@@ -214,7 +214,6 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                   ],
                 ),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Header
                     Row(
@@ -258,13 +257,15 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
 
                     const SizedBox(height: 20),
 
-                    // Step bubbles + lines
-                    Row(
-                      children: List.generate(_steps.length, (i) {
-                        final done = i < _currentStep;
-                        final current = i == _currentStep;
-                        return Expanded(
-                          child: Row(
+                    // Step bubbles + lines (centered)
+                    Center(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: List.generate(_steps.length, (i) {
+                          final done = i < _currentStep;
+                          final current = i == _currentStep;
+                          return Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Column(
                                 children: [
@@ -307,44 +308,51 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                                 ],
                               ),
                               if (i < _steps.length - 1)
-                                Expanded(
-                                  child: Container(
-                                    height: 3,
-                                    margin: const EdgeInsets.only(bottom: 0),
-                                    decoration: BoxDecoration(
-                                      color: done
-                                          ? const Color(0xFF4CAF50)
-                                          : Colors.grey.shade200,
-                                      borderRadius: BorderRadius.circular(2),
-                                    ),
+                                Container(
+                                  width: 90,
+                                  height: 3,
+                                  margin: const EdgeInsets.only(bottom: 0),
+                                  decoration: BoxDecoration(
+                                    color: done
+                                        ? const Color(0xFF4CAF50)
+                                        : Colors.grey.shade200,
+                                    borderRadius: BorderRadius.circular(2),
                                   ),
                                 ),
                             ],
-                          ),
-                        );
-                      }),
+                          );
+                        }),
+                      ),
                     ),
 
-                    // Labels under bubbles
+                    // Labels under bubbles (centered)
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(_steps.length, (i) {
                           final active = i <= _currentStep;
-                          return Expanded(
-                            child: Text(
-                              _steps[i].label,
-                              style: TextStyle(
-                                fontSize: 9,
-                                color: active
-                                    ? const Color(0xFF4CAF50)
-                                    : Colors.grey,
-                                fontWeight: active
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
-                                height: 1.4,
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              right: i < _steps.length - 1 ? 50 : 0,
+                            ),
+                            child: SizedBox(
+                              width: 76,
+                              child: Text(
+                                _steps[i].label,
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  color: active
+                                      ? const Color(0xFF4CAF50)
+                                      : Colors.grey,
+                                  fontWeight: active
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                  height: 1.4,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
                               ),
-                              textAlign: TextAlign.center,
                             ),
                           );
                         }),
@@ -353,10 +361,10 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
 
                     const SizedBox(height: 16),
 
-                    // Progress bar (เฉพาะ step กำลังปั่น)
+                    // Progress bar (เฉพาะ step กำลังปั่น) - centered
                     if (!isLast) ...[
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
                             step.sublabel,
@@ -365,6 +373,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                               color: Colors.grey,
                             ),
                           ),
+                          const SizedBox(width: 12),
                           Text(
                             '~10-15 min',
                             style: TextStyle(
@@ -378,23 +387,29 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                       const SizedBox(height: 6),
                       ClipRRect(
                         borderRadius: BorderRadius.circular(6),
-                        child: LinearProgressIndicator(
-                          value: _stepProgress,
-                          minHeight: 7,
-                          backgroundColor: Colors.green.shade100,
-                          valueColor: const AlwaysStoppedAnimation(
-                            Color(0xFF4CAF50),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: LinearProgressIndicator(
+                            value: _stepProgress,
+                            minHeight: 7,
+                            backgroundColor: Colors.green.shade100,
+                            valueColor: const AlwaysStoppedAnimation(
+                              Color(0xFF4CAF50),
+                            ),
                           ),
                         ),
                       ),
                     ] else
                       ClipRRect(
                         borderRadius: BorderRadius.circular(6),
-                        child: const LinearProgressIndicator(
-                          value: 1.0,
-                          minHeight: 7,
-                          backgroundColor: Color(0xFFC8E6C9),
-                          valueColor: AlwaysStoppedAnimation(Color(0xFF4CAF50)),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: const LinearProgressIndicator(
+                            value: 1.0,
+                            minHeight: 7,
+                            backgroundColor: Color(0xFFC8E6C9),
+                            valueColor: AlwaysStoppedAnimation(Color(0xFF4CAF50)),
+                          ),
                         ),
                       ),
                   ],

@@ -95,7 +95,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen>
               // AppBar
               Container(
                 color: Colors.white,
-                padding: const EdgeInsets.fromLTRB(20, 12, 16, 12),
+                padding: const EdgeInsets.fromLTRB(20, 12, 0, 12),
                 child: Row(
                   children: [
                     Column(
@@ -120,7 +120,10 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen>
                       ],
                     ),
                     const Spacer(),
-                    const CartIconButton(),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 16),
+                      child: const CartIconButton(),
+                    ),
                   ],
                 ),
               ),
@@ -326,25 +329,27 @@ SmoothieItem _smoothieFromOrder(OrderModel order) {
     if (combinedIndexes.length != found.fruitIndexes.length ||
         !combinedIndexes.every((i) => found.fruitIndexes.contains(i))) {
       // Create custom version with original indexes preserved
-      final toppings = order.toppings
-          .map((name) => _findTopping(name))
-          .whereType<ToppingItem>()
-          .toList();
-      final toppingTotal = toppings.fold(0.0, (s, t) => s + t.price);
-      final sizeUpgrade = kSizeUpgrade[order.size] ?? 7;
-      final basePrice = order.itemPriceRaw - sizeUpgrade - toppingTotal;
-
       return SmoothieItem(
         name: order.menuName,
         emoji: order.menuEmoji,
-        basePrice: basePrice,
+        basePrice: order.basePrice,
         ingredients: order.ingredients,
         category: 'custom',
         fruitIndexes: combinedIndexes,
       );
     }
 
-    return found;
+    // For unmodified preset, create new instance with saved basePrice
+    return SmoothieItem(
+      name: found.name,
+      emoji: found.emoji,
+      basePrice: order.basePrice,
+      ingredients: found.ingredients,
+      category: found.category,
+      fruitIndexes: found.fruitIndexes,
+      badge: found.badge,
+      description: found.description,
+    );
   } catch (_) {
     // custom smoothie — back-calculate basePrice จาก itemPriceRaw
     // itemPriceRaw = (basePrice * sizeMultiplier + toppingTotal) * qty

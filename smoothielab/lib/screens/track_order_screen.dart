@@ -254,6 +254,7 @@ class _TrackOrderScreenState extends State<TrackOrderScreen>
               backgroundColor: Colors.white,
               elevation: 0,
               scrolledUnderElevation: 0,
+              titleSpacing: 20,
               leading: GestureDetector(
                 onTap: () => Navigator.pop(context),
                 child: Container(

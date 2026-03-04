@@ -63,4 +63,8 @@ class OrderModel extends HiveObject {
   // Topping indexes for editing
   @HiveField(18)
   List<int> toppingsIndexes = [];
+
+  // Base price for reorder (ค่า basePrice จริงจากตะกร้า)
+  @HiveField(19)
+  late double basePrice;
 }

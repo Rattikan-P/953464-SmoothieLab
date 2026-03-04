@@ -755,7 +755,13 @@ class LabScreenState extends State<LabScreen>
         backgroundColor: Colors.white,
         elevation: 0,
         automaticallyImplyLeading: false,
-        actions: const [CartIconButton()],
+        titleSpacing: 20,
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 16),
+            child: CartIconButton(),
+          ),
+        ],
       ),
       body: Column(
         children: [

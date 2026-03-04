@@ -34,8 +34,9 @@ class CartScreen extends StatelessWidget {
               ),
           ],
         ),
-        backgroundColor: const Color(0xFFF8F8F8),
+        backgroundColor: Colors.white,
         elevation: 0,
+        titleSpacing: 20,
       ),
       body: cart.items.isEmpty
           ? _EmptyCart()

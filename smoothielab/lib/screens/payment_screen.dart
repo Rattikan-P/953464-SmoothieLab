@@ -153,8 +153,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
         leading: const BackButton(),
         title: const Text('Checkout',
             style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: const Color(0xFFF8F8F8),
+        backgroundColor: Colors.white,
         elevation: 0,
+        titleSpacing: 20,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20),

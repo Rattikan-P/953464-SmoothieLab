@@ -1,37 +1,111 @@
+import 'package:hive/hive.dart';
 import 'smoothie_item.dart';
 import '../data/ingredients_data.dart';
 
-class CartItem {
-  final SmoothieItem smoothie;
-  String size;
-  List<ToppingItem> toppings;
-  String sweetness;
-  int quantity;
-  final bool isCustom;
-  final List<int> fruitIndexes;
-  final List<int> extrasIndexes;
-  final List<int> veggieIndexes;
-  final List<int> herbsIndexes;
-  final List<int> toppingsIndexes;
+part 'cart_item.g.dart';
 
+@HiveType(typeId: 1)
+class CartItem extends HiveObject {
+  @HiveField(0)
+  late String menuName;
+
+  @HiveField(1)
+  late String menuEmoji;
+
+  @HiveField(2)
+  late double basePrice;
+
+  @HiveField(3)
+  String size;
+
+  @HiveField(4)
+  List<String> toppingNames;
+
+  @HiveField(5)
+  String sweetness;
+
+  @HiveField(6)
+  int quantity;
+
+  @HiveField(7)
+  bool isCustom;
+
+  @HiveField(8)
+  List<int> fruitIndexes;
+
+  @HiveField(9)
+  List<int> extrasIndexes;
+
+  @HiveField(10)
+  List<int> veggieIndexes;
+
+  @HiveField(11)
+  List<int> herbsIndexes;
+
+  @HiveField(12)
+  List<int> toppingsIndexes;
+
+  // Default constructor for Hive (all fields optional with defaults)
   CartItem({
-    required this.smoothie,
     this.size = 'M',
-    List<ToppingItem>? toppings,
+    this.toppingNames = const [],
     this.sweetness = 'หวานปกติ',
     this.quantity = 1,
     this.isCustom = false,
+    this.fruitIndexes = const [],
+    this.extrasIndexes = const [],
+    this.veggieIndexes = const [],
+    this.herbsIndexes = const [],
+    this.toppingsIndexes = const [],
+  });
+
+  // Factory constructor for creating CartItem from SmoothieItem
+  factory CartItem.fromSmoothie(
+    SmoothieItem smoothie, {
+    String size = 'M',
+    List<ToppingItem>? toppings,
+    String sweetness = 'หวานปกติ',
+    bool isCustom = false,
     List<int>? fruitIndexes,
     List<int>? extrasIndexes,
     List<int>? veggieIndexes,
     List<int>? herbsIndexes,
     List<int>? toppingsIndexes,
-  }) : toppings = toppings ?? [],
-       fruitIndexes = fruitIndexes ?? [],
-       extrasIndexes = extrasIndexes ?? [],
-       veggieIndexes = veggieIndexes ?? [],
-       herbsIndexes = herbsIndexes ?? [],
-       toppingsIndexes = toppingsIndexes ?? [];
+  }) {
+    return CartItem()
+      ..menuName = smoothie.name
+      ..menuEmoji = smoothie.emoji
+      ..basePrice = smoothie.basePrice
+      ..size = size
+      ..toppingNames = toppings?.map((t) => t.name).toList() ?? []
+      ..sweetness = sweetness
+      ..quantity = 1
+      ..isCustom = isCustom
+      ..fruitIndexes = fruitIndexes ?? smoothie.fruitIndexes
+      ..extrasIndexes = extrasIndexes ?? smoothie.extrasIndexes
+      ..veggieIndexes = veggieIndexes ?? smoothie.veggieIndexes
+      ..herbsIndexes = herbsIndexes ?? smoothie.herbsIndexes
+      ..toppingsIndexes = toppingsIndexes ?? [];
+  }
+
+  // Get SmoothieItem from menuName
+  SmoothieItem get smoothie {
+    final found = kMenuItems.firstWhere(
+      (item) => item.name == menuName,
+      orElse: () => kMenuItems.first, // Fallback to first item
+    );
+    return found;
+  }
+
+  // Get ToppingItem list from topping names
+  List<ToppingItem> get toppings {
+    return toppingNames
+        .map((name) => kToppingData.firstWhere(
+              (t) => t.name == name,
+              orElse: () => kToppingData.first,
+            ))
+        .toList();
+  }
 
   String get displayName {
     // สร้างชื่อจาก ingredient indexes เสมอ (ไม่ว่าจะ preset หรือ custom)
@@ -78,7 +152,7 @@ class CartItem {
   }
 
   double get itemPrice {
-    double base = smoothie.basePrice + kSizeUpgrade[size]!;
+    double base = basePrice + kSizeUpgrade[size]!;
     double toppingTotal = toppings.fold(0, (sum, t) => sum + t.price);
     return (base + toppingTotal) * quantity;
   }

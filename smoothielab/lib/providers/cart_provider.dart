@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import '../models/smoothie_item.dart';
 import '../models/cart_item.dart';
 import '../data/ingredients_data.dart';
 
 class CartProvider extends ChangeNotifier {
-  final List<CartItem> _items = [];
+  late Box<CartItem> _cartBox;
+  bool _isInitialized = false;
 
-  List<CartItem> get items => List.unmodifiable(_items);
-  int get totalCount => _items.fold(0, (sum, i) => sum + i.quantity);
+  List<CartItem> get items {
+    if (!_isInitialized) return [];
+    return _cartBox.values.toList();
+  }
 
-  double get subtotal => _items.fold(0.0, (sum, i) => sum + i.itemPrice);
+  int get totalCount => items.fold(0, (sum, i) => sum + i.quantity);
+
+  double get subtotal => items.fold(0.0, (sum, i) => sum + i.itemPrice);
 
   // Dynamic discount tiers
   // ≥ 300฿ → ลด 15%
@@ -34,6 +40,13 @@ class CartProvider extends ChangeNotifier {
   double get vat => afterDiscount * 0.07;
   double get total => afterDiscount + vat;
 
+  // Initialize with existing box (opened in main.dart)
+  void init(Box<CartItem> cartBox) {
+    _cartBox = cartBox;
+    _isInitialized = true;
+    notifyListeners();
+  }
+
   void addItem(
     SmoothieItem smoothie, {
     String size = 'M',
@@ -45,46 +58,63 @@ class CartProvider extends ChangeNotifier {
     List<int>? veggieIndexes,
     List<int>? herbsIndexes,
     List<int>? toppingsIndexes,
-  }) {
-    _items.add(
-      CartItem(
-        smoothie: smoothie,
-        size: size,
-        toppings: toppings ?? [],
-        sweetness: sweetness,
-        isCustom: isCustom,
-        fruitIndexes: fruitIndexes ?? [],
-        extrasIndexes: extrasIndexes ?? [],
-        veggieIndexes: veggieIndexes ?? [],
-        herbsIndexes: herbsIndexes ?? [],
-        toppingsIndexes: toppingsIndexes ?? [],
-      ),
+  }) async {
+    final cartItem = CartItem.fromSmoothie(
+      smoothie,
+      size: size,
+      toppings: toppings,
+      sweetness: sweetness,
+      isCustom: isCustom,
+      fruitIndexes: fruitIndexes,
+      extrasIndexes: extrasIndexes,
+      veggieIndexes: veggieIndexes,
+      herbsIndexes: herbsIndexes,
+      toppingsIndexes: toppingsIndexes,
     );
+    await _cartBox.add(cartItem);
     notifyListeners();
   }
 
-  void removeAt(int index) {
-    _items.removeAt(index);
-    notifyListeners();
+  void removeAt(int index) async {
+    if (index >= 0 && index < items.length) {
+      final key = _cartBox.keys.elementAt(index);
+      await _cartBox.delete(key);
+      notifyListeners();
+    }
   }
 
-  void incrementAt(int index) {
-    _items[index].quantity++;
-    notifyListeners();
+  void incrementAt(int index) async {
+    if (index >= 0 && index < items.length) {
+      final key = _cartBox.keys.elementAt(index);
+      final item = _cartBox.get(key);
+      if (item != null) {
+        item.quantity++;
+        await item.save();
+        notifyListeners();
+      }
+    }
   }
 
   // คืนค่า true ถ้าต้องแสดง confirm dialog (qty == 1)
   bool decrementAt(int index) {
-    if (_items[index].quantity > 1) {
-      _items[index].quantity--;
-      notifyListeners();
-      return false; // ไม่ต้อง confirm
+    if (index >= 0 && index < items.length) {
+      final key = _cartBox.keys.elementAt(index);
+      final item = _cartBox.get(key);
+      if (item != null) {
+        if (item.quantity > 1) {
+          item.quantity--;
+          item.save();
+          notifyListeners();
+          return false; // ไม่ต้อง confirm
+        }
+        return true; // ต้อง confirm ก่อนลบ
+      }
     }
-    return true; // ต้อง confirm ก่อนลบ
+    return false;
   }
 
-  void clear() {
-    _items.clear();
+  void clear() async {
+    await _cartBox.clear();
     notifyListeners();
   }
 
@@ -98,24 +128,47 @@ class CartProvider extends ChangeNotifier {
     required List<int> extrasIndexes,
     required List<int> veggieIndexes,
     required List<int> herbsIndexes,
-    bool isCustom = true, // ✅ เพิ่ม
-    List<int>? toppingsIndexes, // ✅ เพิ่ม
-  }) {
-    if (index < 0 || index >= _items.length) return;
-    final oldQty = _items[index].quantity;
-    _items[index] = CartItem(
-      smoothie: smoothie,
-      size: size,
-      toppings: toppings,
-      sweetness: sweetness,
-      isCustom: isCustom, // ✅
-      fruitIndexes: fruitIndexes,
-      extrasIndexes: extrasIndexes,
-      veggieIndexes: veggieIndexes,
-      herbsIndexes: herbsIndexes,
-      toppingsIndexes: toppingsIndexes ?? [], // ✅ เพิ่ม
-      quantity: oldQty,
-    );
-    notifyListeners();
+    bool isCustom = true,
+    List<int>? toppingsIndexes,
+  }) async {
+    if (index < 0 || index >= items.length) return;
+
+    final key = _cartBox.keys.elementAt(index);
+    final oldItem = _cartBox.get(key);
+
+    if (oldItem != null) {
+      final oldQty = oldItem.quantity;
+
+      // Create new item with updated data
+      final newItem = CartItem.fromSmoothie(
+        smoothie,
+        size: size,
+        toppings: toppings,
+        sweetness: sweetness,
+        isCustom: isCustom,
+        fruitIndexes: fruitIndexes,
+        extrasIndexes: extrasIndexes,
+        veggieIndexes: veggieIndexes,
+        herbsIndexes: herbsIndexes,
+        toppingsIndexes: toppingsIndexes,
+      )..quantity = oldQty;
+
+      // Update fields in the existing item to preserve HiveObject reference
+      oldItem.menuName = newItem.menuName;
+      oldItem.menuEmoji = newItem.menuEmoji;
+      oldItem.basePrice = newItem.basePrice;
+      oldItem.size = newItem.size;
+      oldItem.toppingNames = newItem.toppingNames;
+      oldItem.sweetness = newItem.sweetness;
+      oldItem.isCustom = newItem.isCustom;
+      oldItem.fruitIndexes = newItem.fruitIndexes;
+      oldItem.extrasIndexes = newItem.extrasIndexes;
+      oldItem.veggieIndexes = newItem.veggieIndexes;
+      oldItem.herbsIndexes = newItem.herbsIndexes;
+      oldItem.toppingsIndexes = newItem.toppingsIndexes;
+
+      await oldItem.save();
+      notifyListeners();
+    }
   }
 }

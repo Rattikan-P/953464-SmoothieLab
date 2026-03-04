@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'models/order_model.dart';
+import 'models/cart_item.dart';
 import 'providers/cart_provider.dart';
 import 'providers/navigation_provider.dart';
 import 'screens/home_screen.dart';
@@ -14,18 +15,22 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
   Hive.registerAdapter(OrderModelAdapter());
+  Hive.registerAdapter(CartItemAdapter());
   await Hive.openBox<OrderModel>('orders');
-  runApp(const SmoothieLabApp());
+  final cartBox = await Hive.openBox<CartItem>('cart');
+  runApp(SmoothieLabApp(cartBox: cartBox));
 }
 
 class SmoothieLabApp extends StatelessWidget {
-  const SmoothieLabApp({super.key});
+  final Box<CartItem> cartBox;
+
+  const SmoothieLabApp({super.key, required this.cartBox});
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => CartProvider()..init(cartBox)),
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
       ],
       child: MaterialApp(

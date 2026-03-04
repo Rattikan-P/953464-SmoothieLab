@@ -16,7 +16,7 @@ class PaymentScreen extends StatefulWidget {
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
-  int _seconds = 300;
+  int _seconds = 10;
   Timer? _timer;
   bool _expired = false;
 

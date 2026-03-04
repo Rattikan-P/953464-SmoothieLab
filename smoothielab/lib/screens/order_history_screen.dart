@@ -307,9 +307,44 @@ String _buildDisplayName(OrderModel item) {
 SmoothieItem _smoothieFromOrder(OrderModel order) {
   // ลอง match กับ kMenuItems ก่อน (preset menu)
   try {
-    return kMenuItems.firstWhere(
+    final found = kMenuItems.firstWhere(
       (m) => m.name == order.menuName && m.emoji == order.menuEmoji,
     );
+
+    // For preset smoothies, check if the order has custom ingredient indexes
+    // (meaning the user modified the ingredients before ordering)
+    // If so, we need to preserve those indexes
+    final combinedIndexes = [
+      ...order.fruitIndexes,
+      ...order.extrasIndexes,
+      ...order.veggieIndexes,
+      ...order.herbsIndexes,
+    ];
+
+    // If the combined indexes differ from the preset's fruitIndexes,
+    // this was a modified preset - treat it as custom to preserve indexes
+    if (combinedIndexes.length != found.fruitIndexes.length ||
+        !combinedIndexes.every((i) => found.fruitIndexes.contains(i))) {
+      // Create custom version with original indexes preserved
+      final toppings = order.toppings
+          .map((name) => _findTopping(name))
+          .whereType<ToppingItem>()
+          .toList();
+      final toppingTotal = toppings.fold(0.0, (s, t) => s + t.price);
+      final sizeUpgrade = kSizeUpgrade[order.size] ?? 7;
+      final basePrice = order.itemPriceRaw - sizeUpgrade - toppingTotal;
+
+      return SmoothieItem(
+        name: order.menuName,
+        emoji: order.menuEmoji,
+        basePrice: basePrice,
+        ingredients: order.ingredients,
+        category: 'custom',
+        fruitIndexes: combinedIndexes,
+      );
+    }
+
+    return found;
   } catch (_) {
     // custom smoothie — back-calculate basePrice จาก itemPriceRaw
     // itemPriceRaw = (basePrice * sizeMultiplier + toppingTotal) * qty
@@ -323,12 +358,21 @@ SmoothieItem _smoothieFromOrder(OrderModel order) {
     final sizeUpgrade = kSizeUpgrade[order.size] ?? 7;
     final basePrice = order.itemPriceRaw - sizeUpgrade - toppingTotal;
 
+    // Combine all ingredient indexes into fruitIndexes for SmoothieItem
+    final combinedIndexes = [
+      ...order.fruitIndexes,
+      ...order.extrasIndexes,
+      ...order.veggieIndexes,
+      ...order.herbsIndexes,
+    ];
+
     return SmoothieItem(
       name: order.menuName,
       emoji: order.menuEmoji,
       basePrice: basePrice,
       ingredients: order.ingredients,
       category: 'custom',
+      fruitIndexes: combinedIndexes,
     );
   }
 }

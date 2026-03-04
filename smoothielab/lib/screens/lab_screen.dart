@@ -1706,12 +1706,15 @@ class LabScreenState extends State<LabScreen>
                                 toppingsIndexes: _toppings.toList(),
                               );
                               // snackbar แสดงชื่อเมนูจริง
+                              final ingredientNames = _selectedIngredientsOrder.map((e) => e.name).join('+');
+                              final displayName = ingredientNames.length > 40
+                                  ? '${ingredientNames.substring(0, 37)}...'
+                                  : ingredientNames;
+
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    isFromMenu
-                                        ? 'Added $itemName $itemEmoji!'
-                                        : 'Added ${_selectedIngredientsOrder.map((e) => e.name).join('+')}! 🧪',
+                                    'Added $displayName! 🧪',
                                   ),
                                   backgroundColor: Colors.green,
                                   duration: const Duration(seconds: 2),

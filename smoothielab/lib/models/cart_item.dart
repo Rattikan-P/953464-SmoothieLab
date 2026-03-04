@@ -34,9 +34,7 @@ class CartItem {
        toppingsIndexes = toppingsIndexes ?? [];
 
   String get displayName {
-    if (!isCustom) return smoothie.name;
-
-    // สร้างชื่อจาก ingredients ที่เลือกจริงๆ
+    // สร้างชื่อจาก ingredient indexes เสมอ (ไม่ว่าจะ preset หรือ custom)
     final names = <String>[];
 
     // ผลไม้
@@ -70,7 +68,13 @@ class CartItem {
       }
     }
 
-    return names.isEmpty ? 'Custom Smoothie' : names.join(' + ');
+    final fullName = names.isEmpty ? 'Custom Smoothie' : names.join(' + ');
+
+    // ถ้าชื่อเกิน 40 ตัวอักษร ให้ตัดแล้วใส่ ...
+    if (fullName.length > 40) {
+      return '${fullName.substring(0, 37)}...';
+    }
+    return fullName;
   }
 
   double get itemPrice {

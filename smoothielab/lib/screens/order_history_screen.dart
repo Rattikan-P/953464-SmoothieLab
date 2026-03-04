@@ -259,6 +259,51 @@ ToppingItem? _findTopping(String name) {
   }
 }
 
+/// สร้างชื่อแสดงผลเหมือน CartItem.displayName เลย (ใช้ ingredient names เสมอ)
+String _buildDisplayName(OrderModel item) {
+  // สร้างชื่อจาก ingredient indexes เสมอ (ไม่ว่าจะ preset หรือ custom)
+  final names = <String>[];
+
+  // ผลไม้
+  for (final i in item.fruitIndexes) {
+    if (i >= 0 && i < kFruitsData.length) {
+      names.add(kFruitsData[i].$2);
+    }
+  }
+
+  // Extras
+  for (final i in item.extrasIndexes) {
+    final adjustedIndex = i - 30;
+    if (adjustedIndex >= 0 && adjustedIndex < kExtrasData.length) {
+      names.add(kExtrasData[adjustedIndex].$2);
+    }
+  }
+
+  // ผัก
+  for (final i in item.veggieIndexes) {
+    final adjustedIndex = i - 100;
+    if (adjustedIndex >= 0 && adjustedIndex < kVeggiesData.length) {
+      names.add(kVeggiesData[adjustedIndex].$2);
+    }
+  }
+
+  // สมุนไพร
+  for (final i in item.herbsIndexes) {
+    final adjustedIndex = i - 260;
+    if (adjustedIndex >= 0 && adjustedIndex < kHerbsData.length) {
+      names.add(kHerbsData[adjustedIndex].$2);
+    }
+  }
+
+  final fullName = names.isEmpty ? 'Custom Smoothie' : names.join(' + ');
+
+  // ถ้าชื่อเกิน 40 ตัวอักษร ให้ตัดแล้วใส่ ...
+  if (fullName.length > 40) {
+    return '${fullName.substring(0, 37)}...';
+  }
+  return fullName;
+}
+
 SmoothieItem _smoothieFromOrder(OrderModel order) {
   // ลอง match กับ kMenuItems ก่อน (preset menu)
   try {
@@ -623,7 +668,7 @@ class _OrderCard extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  item.menuName,
+                                  _buildDisplayName(item),
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w700,
                                     fontSize: 14,
@@ -649,36 +694,6 @@ class _OrderCard extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                if (item.ingredients.isNotEmpty) ...[
-                                  const SizedBox(height: 5),
-                                  Wrap(
-                                    spacing: 4,
-                                    runSpacing: 4,
-                                    children: item.ingredients
-                                        .take(4)
-                                        .map(
-                                          (ing) => Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 6,
-                                              vertical: 2,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: Colors.grey.shade100,
-                                              borderRadius:
-                                                  BorderRadius.circular(6),
-                                            ),
-                                            child: Text(
-                                              ing,
-                                              style: TextStyle(
-                                                fontSize: 10,
-                                                color: Colors.grey.shade700,
-                                              ),
-                                            ),
-                                          ),
-                                        )
-                                        .toList(),
-                                  ),
-                                ],
                                 if (item.sweetness.isNotEmpty) ...[
                                   const SizedBox(height: 4),
                                   Container(

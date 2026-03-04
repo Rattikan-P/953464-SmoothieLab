@@ -62,9 +62,9 @@ const List<(String emoji, String name, double price)> kFruitsData = [
   ('🍉', 'Watermelon', 13.0),      // 9
   ('🍊', 'Orange', 10.0),          // 10
   ('🍏', 'Apple', 12.0),           // 11
-  ('🍋', 'Lime', 8.0),             // 12
+  ('🍋‍🟩', 'Lime', 8.0),             // 12
   ('🍋', 'Lemon', 8.0),            // 13
-  ('🍈', 'Lychee', 15.0),          // 14
+  ('🩷', 'Lychee', 15.0),          // 14
   ('🐉', 'Dragon Fruit', 18.0),    // 15
 ];
 

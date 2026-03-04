@@ -42,7 +42,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Berry Blast',
     emoji: '🍓',
-    basePrice: 58, // 25+15+18
+    basePrice: 25, // 25+15+18
     ingredients: ['Strawberry', 'Blueberry'],
     category: 'berry',
     fruitIndexes: [0, 3],
@@ -52,7 +52,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Pink Paradise',
     emoji: '🌸',
-    basePrice: 71, // 25+15+16+15
+    basePrice: 25, // 25+15+16+15
     ingredients: ['Strawberry', 'Raspberry', 'Lychee'],
     category: 'berry',
     fruitIndexes: [0, 6, 14],
@@ -60,7 +60,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Strawberry Lemon',
     emoji: '🍓',
-    basePrice: 58, // 25+15+8+10
+    basePrice: 25, // 25+15+8+10
     ingredients: ['Strawberry', 'Lemon', 'Honey'],
     category: 'berry',
     fruitIndexes: [0, 13, 262],
@@ -68,7 +68,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Berry Dream',
     emoji: '💜',
-    basePrice: 59, // 25+18+16
+    basePrice: 25, // 25+18+16
     ingredients: ['Blueberry', 'Raspberry'],
     category: 'berry',
     fruitIndexes: [3, 6],
@@ -76,7 +76,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Blueberry Mint',
     emoji: '🫐',
-    basePrice: 56, // 25+18+5+8
+    basePrice: 25, // 25+18+5+8
     ingredients: ['Blueberry', 'Mint', 'Lemon'],
     category: 'berry',
     fruitIndexes: [3, 260, 13],
@@ -84,7 +84,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Peach Fuzz',
     emoji: '🍑',
-    basePrice: 63, // 25+14+14+10
+    basePrice: 25, // 25+14+14+10
     ingredients: ['Peach', 'Apricot', 'Honey'],
     category: 'berry',
     fruitIndexes: [5, 8, 262],
@@ -92,7 +92,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Peach Raspberry',
     emoji: '🍑',
-    basePrice: 63, // 25+14+16+8
+    basePrice: 25, // 25+14+16+8
     ingredients: ['Peach', 'Raspberry', 'Lemon'],
     category: 'berry',
     fruitIndexes: [5, 6, 13],
@@ -100,7 +100,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Raspberry Mint',
     emoji: '🍓',
-    basePrice: 54, // 25+16+5+8
+    basePrice: 25, // 25+16+5+8
     ingredients: ['Raspberry', 'Mint', 'Lemon'],
     category: 'berry',
     fruitIndexes: [6, 260, 13],
@@ -108,7 +108,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Apricot Glow',
     emoji: '🟠',
-    basePrice: 61, // 25+14+14+8
+    basePrice: 25, // 25+14+14+8
     ingredients: ['Apricot', 'Peach', 'Lime'],
     category: 'berry',
     fruitIndexes: [8, 5, 12],
@@ -116,7 +116,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Watermelon Wave',
     emoji: '🍉',
-    basePrice: 51, // 25+13+5+8
+    basePrice: 25, // 25+13+5+8
     ingredients: ['Watermelon', 'Mint', 'Lime'],
     category: 'berry',
     fruitIndexes: [9, 260, 12],
@@ -124,7 +124,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Watermelon Frost',
     emoji: '🍉',
-    basePrice: 58, // 25+13+15+5
+    basePrice: 25, // 25+13+15+5
     ingredients: ['Watermelon', 'Lychee', 'Mint'],
     category: 'berry',
     fruitIndexes: [9, 14, 260],
@@ -132,7 +132,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Lychee Rose',
     emoji: '🍈',
-    basePrice: 61, // 25+15+16+5
+    basePrice: 25, // 25+15+16+5
     ingredients: ['Lychee', 'Raspberry', 'Mint'],
     category: 'berry',
     fruitIndexes: [14, 6, 260],
@@ -140,7 +140,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Lychee Peach',
     emoji: '🍈',
-    basePrice: 64, // 25+15+14+10
+    basePrice: 25, // 25+15+14+10
     ingredients: ['Lychee', 'Peach', 'Honey'],
     category: 'berry',
     fruitIndexes: [14, 5, 262],
@@ -148,7 +148,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Dragon Glow',
     emoji: '🐉',
-    basePrice: 66, // 25+18+15+8
+    basePrice: 25, // 25+18+15+8
     ingredients: ['Dragon Fruit', 'Lychee', 'Lime'],
     category: 'berry',
     fruitIndexes: [15, 14, 12],
@@ -157,7 +157,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Dragon Berry',
     emoji: '🐉',
-    basePrice: 66, // 25+18+15+8
+    basePrice: 25, // 25+18+15+8
     ingredients: ['Dragon Fruit', 'Strawberry', 'Lemon'],
     category: 'berry',
     fruitIndexes: [15, 0, 13],
@@ -167,7 +167,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Mango Tango',
     emoji: '🥭',
-    basePrice: 57, // 25+12+12+8
+    basePrice: 25, // 25+12+12+8
     ingredients: ['Mango', 'Pineapple', 'Lime'],
     category: 'tropical',
     fruitIndexes: [1, 7, 12],
@@ -177,7 +177,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Sunny Mango',
     emoji: '🌞',
-    basePrice: 55, // 25+12+10+8
+    basePrice: 25, // 25+12+10+8
     ingredients: ['Mango', 'Orange', 'Lemon'],
     category: 'tropical',
     fruitIndexes: [1, 10, 13],
@@ -185,7 +185,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Mango Coconut',
     emoji: '🥭',
-    basePrice: 57, // 25+12+12+8
+    basePrice: 25, // 25+12+12+8
     ingredients: ['Mango', 'Coconut', 'Lime'],
     category: 'tropical',
     fruitIndexes: [1, 31, 12],
@@ -193,7 +193,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Banana Boost',
     emoji: '🍌',
-    basePrice: 51, // 25+8+10+8
+    basePrice: 25, // 25+8+10+8
     ingredients: ['Banana', 'Milk', 'Oat'],
     category: 'tropical',
     fruitIndexes: [2, 30, 33],
@@ -203,7 +203,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Honey Peach',
     emoji: '🍯',
-    basePrice: 57, // 25+8+10+14
+    basePrice: 25, // 25+8+10+14
     ingredients: ['Banana', 'Honey', 'Peach'],
     category: 'tropical',
     fruitIndexes: [2, 262, 5],
@@ -211,7 +211,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Banana Mango',
     emoji: '🍌',
-    basePrice: 57, // 25+8+12+12
+    basePrice: 25, // 25+8+12+12
     ingredients: ['Banana', 'Mango', 'Pineapple'],
     category: 'tropical',
     fruitIndexes: [2, 1, 7],
@@ -219,7 +219,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Tropical Blast',
     emoji: '🌴',
-    basePrice: 59, // 25+12+12+10
+    basePrice: 25, // 25+12+12+10
     ingredients: ['Pineapple', 'Mango', 'Orange'],
     category: 'tropical',
     fruitIndexes: [7, 1, 10],
@@ -227,7 +227,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Coconut Dream',
     emoji: '🥥',
-    basePrice: 57, // 25+12+12+8
+    basePrice: 25, // 25+12+12+8
     ingredients: ['Pineapple', 'Coconut', 'Lime'],
     category: 'tropical',
     fruitIndexes: [7, 31, 12],
@@ -235,7 +235,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Pineapple Ginger',
     emoji: '🍍',
-    basePrice: 50, // 25+12+5+8
+    basePrice: 25, // 25+12+5+8
     ingredients: ['Pineapple', 'Ginger', 'Lime'],
     category: 'tropical',
     fruitIndexes: [7, 261, 12],
@@ -243,7 +243,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Citrus Burst',
     emoji: '🍊',
-    basePrice: 51, // 25+10+8+8
+    basePrice: 25, // 25+10+8+8
     ingredients: ['Orange', 'Lemon', 'Lime'],
     category: 'tropical',
     fruitIndexes: [10, 13, 12],
@@ -251,7 +251,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Orange Mango',
     emoji: '🍊',
-    basePrice: 52, // 25+10+12+5
+    basePrice: 25, // 25+10+12+5
     ingredients: ['Orange', 'Mango', 'Ginger'],
     category: 'tropical',
     fruitIndexes: [10, 1, 261],
@@ -259,7 +259,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Coconut Banana',
     emoji: '🥥',
-    basePrice: 55, // 25+12+8+10
+    basePrice: 25, // 25+12+8+10
     ingredients: ['Coconut', 'Banana', 'Honey'],
     category: 'tropical',
     fruitIndexes: [31, 2, 262],
@@ -267,7 +267,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Choco Dream',
     emoji: '🍫',
-    basePrice: 57, // 25+12+10+10
+    basePrice: 25, // 25+12+10+10
     ingredients: ['Chocolate', 'Cocoa', 'Milk'],
     category: 'tropical',
     fruitIndexes: [34, 35, 30],
@@ -277,7 +277,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Green Power',
     emoji: '💚',
-    basePrice: 60, // 25+10(Spinach=102)+12+5+8
+    basePrice: 25, // 25+10(Spinach=102)+12+5+8
     ingredients: ['Spinach', 'Apple', 'Ginger', 'Lime'],
     category: 'green',
     fruitIndexes: [102, 11, 261, 12],
@@ -287,7 +287,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Spinach Lemon',
     emoji: '🥬',
-    basePrice: 55, // 25+10(Spinach=102)+8+12
+    basePrice: 25, // 25+10(Spinach=102)+8+12
     ingredients: ['Spinach', 'Lemon', 'Apple'],
     category: 'green',
     fruitIndexes: [102, 13, 11],
@@ -295,7 +295,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Kale Kick',
     emoji: '🥬',
-    basePrice: 60, // 25+10(Kale=100)+12+8+5
+    basePrice: 25, // 25+10(Kale=100)+12+8+5
     ingredients: ['Kale', 'Apple', 'Lime', 'Ginger'],
     category: 'green',
     fruitIndexes: [100, 11, 12, 261],
@@ -303,7 +303,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Broccoli Boost',
     emoji: '🥦',
-    basePrice: 60, // 25+12(Broccoli=101)+15+8
+    basePrice: 25, // 25+12(Broccoli=101)+15+8
     ingredients: ['Broccoli', 'Kiwi', 'Lemon'],
     category: 'green',
     fruitIndexes: [101, 4, 13],
@@ -311,7 +311,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Green Go',
     emoji: '🥝',
-    basePrice: 48, // 25+15+8(Cucumber=103)
+    basePrice: 25, // 25+15+8(Cucumber=103)
     ingredients: ['Kiwi', 'Cucumber'],
     category: 'green',
     fruitIndexes: [4, 103],
@@ -319,7 +319,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Kiwi Lemonade',
     emoji: '🍋',
-    basePrice: 60, // 25+15+12+8
+    basePrice: 25, // 25+15+12+8
     ingredients: ['Kiwi', 'Apple', 'Lemon'],
     category: 'green',
     fruitIndexes: [4, 11, 13],
@@ -327,7 +327,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Kiwi Mint',
     emoji: '🥝',
-    basePrice: 53, // 25+15+5+8
+    basePrice: 25, // 25+15+5+8
     ingredients: ['Kiwi', 'Mint', 'Lime'],
     category: 'green',
     fruitIndexes: [4, 260, 12],
@@ -335,7 +335,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Detox Green',
     emoji: '🥒',
-    basePrice: 66, // 25+10(Celery=104)+8(Cucumber=103)+15+8
+    basePrice: 25, // 25+10(Celery=104)+8(Cucumber=103)+15+8
     ingredients: ['Celery', 'Cucumber', 'Kiwi', 'Lemon'],
     category: 'green',
     fruitIndexes: [104, 103, 4, 13],
@@ -343,7 +343,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Cucumber Mint',
     emoji: '🥒',
-    basePrice: 46, // 25+8(Cucumber=103)+5+8
+    basePrice: 25, // 25+8(Cucumber=103)+5+8
     ingredients: ['Cucumber', 'Mint', 'Lime'],
     category: 'green',
     fruitIndexes: [103, 260, 12],
@@ -351,7 +351,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Apple Ginger',
     emoji: '🍏',
-    basePrice: 50, // 25+12+5+8
+    basePrice: 25, // 25+12+5+8
     ingredients: ['Apple', 'Ginger', 'Lemon'],
     category: 'green',
     fruitIndexes: [11, 261, 13],
@@ -359,7 +359,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Apple Mint',
     emoji: '🍏',
-    basePrice: 50, // 25+12+5+8
+    basePrice: 25, // 25+12+5+8
     ingredients: ['Apple', 'Mint', 'Lime'],
     category: 'green',
     fruitIndexes: [11, 260, 12],
@@ -367,7 +367,7 @@ const List<SmoothieItem> kMenuItems = [
   SmoothieItem(
     name: 'Celery Boost',
     emoji: '🥬',
-    basePrice: 60, // 25+10(Celery=104)+12+5+8
+    basePrice: 25, // 25+10(Celery=104)+12+5+8
     ingredients: ['Celery', 'Apple', 'Ginger', 'Lemon'],
     category: 'green',
     fruitIndexes: [104, 11, 261, 13],

@@ -67,7 +67,7 @@ class _TrackOrderScreenState extends State<TrackOrderScreen>
     super.dispose();
   }
 
-  /// สร้างชื่อแสดงผลเหมือน CartItem.displayName เลย (ใช้ ingredient names เสมอ)
+  /// สร้างชื่อแสดงผลเหมือน CartItem.displayName เลย (ใช้ ingredient names + ตัด 40)
   String _buildDisplayName(OrderModel item) {
     // สร้างชื่อจาก ingredient indexes เสมอ (ไม่ว่าจะ preset หรือ custom)
     final names = <String>[];
@@ -110,6 +110,44 @@ class _TrackOrderScreenState extends State<TrackOrderScreen>
       return '${fullName.substring(0, 37)}...';
     }
     return fullName;
+  }
+
+  /// รายชื่อวัตถุดิบสำหรับแสดงเป็น pill style
+  List<String> _buildIngredientList(OrderModel item) {
+    final names = <String>[];
+
+    // ผลไม้
+    for (final i in item.fruitIndexes) {
+      if (i >= 0 && i < kFruitsData.length) {
+        names.add(kFruitsData[i].$2);
+      }
+    }
+
+    // Extras
+    for (final i in item.extrasIndexes) {
+      final adjustedIndex = i - 30;
+      if (adjustedIndex >= 0 && adjustedIndex < kExtrasData.length) {
+        names.add(kExtrasData[adjustedIndex].$2);
+      }
+    }
+
+    // ผัก
+    for (final i in item.veggieIndexes) {
+      final adjustedIndex = i - 100;
+      if (adjustedIndex >= 0 && adjustedIndex < kVeggiesData.length) {
+        names.add(kVeggiesData[adjustedIndex].$2);
+      }
+    }
+
+    // สมุนไพร
+    for (final i in item.herbsIndexes) {
+      final adjustedIndex = i - 260;
+      if (adjustedIndex >= 0 && adjustedIndex < kHerbsData.length) {
+        names.add(kHerbsData[adjustedIndex].$2);
+      }
+    }
+
+    return names;
   }
 
   /// Dialog ยืนยันยกเลิกออเดอร์ — รูปแบบเดียวกับ cart_screen.dart
@@ -492,7 +530,7 @@ class _TrackOrderScreenState extends State<TrackOrderScreen>
                                               _buildDisplayName(item),
                                               style: const TextStyle(
                                                 fontWeight: FontWeight.w700,
-                                                fontSize: 14,
+                                                fontSize: 12,
                                                 color: Color(0xFF1A1A1A),
                                               ),
                                             ),
@@ -517,6 +555,102 @@ class _TrackOrderScreenState extends State<TrackOrderScreen>
                                                 ),
                                               ),
                                             ),
+                                            const SizedBox(height: 4),
+                                            Wrap(
+                                              spacing: 4,
+                                              runSpacing: 4,
+                                              children: _buildIngredientList(item)
+                                                  .map(
+                                                    (ing) => Container(
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                        horizontal: 7,
+                                                        vertical: 2,
+                                                      ),
+                                                      decoration: BoxDecoration(
+                                                        color: const Color(
+                                                            0xFFF5F5F5),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(
+                                                                    12),
+                                                        border: Border.all(
+                                                          color: const Color(
+                                                              0xFFE0E0E0),
+                                                          width: 0.5,
+                                                        ),
+                                                      ),
+                                                      child: Text(
+                                                        ing,
+                                                        style: const TextStyle(
+                                                          fontSize: 9,
+                                                          color: Color(
+                                                              0xFF757575),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  )
+                                                  .toList(),
+                                            ),
+                                            if (item.sweetness.isNotEmpty) ...[
+                                              const SizedBox(height: 4),
+                                              Container(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 6,
+                                                      vertical: 2,
+                                                    ),
+                                                decoration: BoxDecoration(
+                                                  color: const Color(0xFFFFF9C4),
+                                                  borderRadius:
+                                                      BorderRadius.circular(6),
+                                                ),
+                                                child: Text(
+                                                  '🍭 ${item.sweetness}',
+                                                  style: const TextStyle(
+                                                    fontSize: 10,
+                                                    color: Color(0xFFF57F17),
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                            if (item.toppings.isNotEmpty) ...[
+                                              const SizedBox(height: 4),
+                                              Wrap(
+                                                spacing: 4,
+                                                runSpacing: 4,
+                                                children: item.toppings
+                                                    .map(
+                                                      (t) => Container(
+                                                        padding: const EdgeInsets
+                                                            .symmetric(
+                                                          horizontal: 6,
+                                                          vertical: 2,
+                                                        ),
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: Colors
+                                                              .pink.shade50,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(6),
+                                                        ),
+                                                        child: Text(
+                                                          t,
+                                                          style: TextStyle(
+                                                            fontSize: 10,
+                                                            color: Colors
+                                                                .pink.shade700,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    )
+                                                    .toList(),
+                                              ),
+                                            ],
                                           ],
                                         ),
                                       ),
@@ -530,58 +664,6 @@ class _TrackOrderScreenState extends State<TrackOrderScreen>
                                       ),
                                     ],
                                   ),
-                                  if (item.sweetness.isNotEmpty) ...[
-                                    const SizedBox(height: 6),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 6,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFFFF9C4),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        '🍭 ${item.sweetness}',
-                                        style: const TextStyle(
-                                          fontSize: 10,
-                                          color: Color(0xFFF57F17),
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                  if (item.toppings.isNotEmpty) ...[
-                                    const SizedBox(height: 6),
-                                    Wrap(
-                                      spacing: 4,
-                                      runSpacing: 4,
-                                      children: item.toppings
-                                          .map(
-                                            (t) => Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 6,
-                                                    vertical: 2,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color: Colors.pink.shade50,
-                                                borderRadius:
-                                                    BorderRadius.circular(6),
-                                              ),
-                                              child: Text(
-                                                t,
-                                                style: TextStyle(
-                                                  fontSize: 10,
-                                                  color: Colors.pink.shade700,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                            ),
-                                          )
-                                          .toList(),
-                                    ),
-                                  ],
                                 ],
                               ),
                             ),

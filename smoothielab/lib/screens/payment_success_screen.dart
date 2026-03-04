@@ -551,7 +551,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                       Icon(Icons.receipt_long_rounded, size: 18),
                       SizedBox(width: 8),
                       Text(
-                        'View Order History',
+                        'Back to Lab',
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,

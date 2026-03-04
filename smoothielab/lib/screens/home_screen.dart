@@ -731,7 +731,7 @@ class _FormulaBannerState extends State<_FormulaBanner>
                           Wrap(
                             spacing: 4,
                             runSpacing: 4,
-                            children: ['🥭 Mango', '🍍 Pineapple', '🍋 Lime']
+                            children: ['🥭 Mango', '🍍 Pineapple', '🟢 Lime']
                                 .map(
                                   (ing) => Container(
                                     padding: const EdgeInsets.symmetric(
@@ -809,7 +809,7 @@ class _FormulaBannerState extends State<_FormulaBanner>
                       child: SmoothieCupWidget(
                         cupColor:
                             kIngredientColors[1] ?? const Color(0xFFFFB347),
-                        fruits: ['🥭', '🍍', '🍋'],
+                        fruits: ['🥭', '🍍', '🟢'],
                         size: 112,
                       ),
                     ),

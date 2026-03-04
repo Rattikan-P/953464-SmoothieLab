@@ -35,13 +35,14 @@ class OrderModelAdapter extends TypeAdapter<OrderModel> {
       ..extrasIndexes = (fields[15] as List).cast<int>()
       ..veggieIndexes = (fields[16] as List).cast<int>()
       ..herbsIndexes = (fields[17] as List).cast<int>()
-      ..toppingsIndexes = (fields[18] as List).cast<int>();
+      ..toppingsIndexes = (fields[18] as List).cast<int>()
+      ..basePrice = fields[19] as double;
   }
 
   @override
   void write(BinaryWriter writer, OrderModel obj) {
     writer
-      ..writeByte(19)
+      ..writeByte(20)
       ..writeByte(0)
       ..write(obj.orderId)
       ..writeByte(1)
@@ -79,7 +80,9 @@ class OrderModelAdapter extends TypeAdapter<OrderModel> {
       ..writeByte(17)
       ..write(obj.herbsIndexes)
       ..writeByte(18)
-      ..write(obj.toppingsIndexes);
+      ..write(obj.toppingsIndexes)
+      ..writeByte(19)
+      ..write(obj.basePrice);
   }
 
   @override

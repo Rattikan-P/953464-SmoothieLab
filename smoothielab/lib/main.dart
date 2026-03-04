@@ -10,6 +10,7 @@ import 'providers/navigation_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/lab_screen.dart';
 import 'screens/order_history_screen.dart';
+import 'services/google_sheets_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,6 +19,16 @@ void main() async {
   Hive.registerAdapter(CartItemAdapter());
   await Hive.openBox<OrderModel>('orders');
   final cartBox = await Hive.openBox<CartItem>('cart');
+
+  // Initialize Google Sheets Service
+  // Using SheetDB (Recommended - Easier, no CORS issues)
+  GoogleSheetsService.setSheetDbUrl('https://sheetdb.io/api/v1/6pwnrw1odfhzw');
+
+  // Option 2: Google Apps Script (Has CORS issues - disabled)
+  // GoogleSheetsService.setScriptUrl(
+  //   'https://script.google.com/macros/s/AKfycbyV26EpPaWiXpoIy8d4zFb329sf613BlGwc7DO5lAndTt_ppK6sM02Ha5SRNfQ_DFRSDw/exec'
+  // );
+
   runApp(SmoothieLabApp(cartBox: cartBox));
 }
 

@@ -8,6 +8,7 @@ import '../data/ingredients_data.dart';
 import '../providers/cart_provider.dart';
 import '../widgets/floating_cart_button.dart';
 import '../widgets/smoothie_cup_widget.dart';
+import '../services/google_sheets_service.dart';
 import 'track_order_screen.dart';
 
 class OrderHistoryScreen extends StatefulWidget {
@@ -31,6 +32,11 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen>
     );
     _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
     _fadeCtrl.forward();
+
+    // Auto-sync from Google Sheets when opening this screen
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _silentSyncFromGoogleSheets();
+    });
   }
 
   @override
@@ -39,7 +45,134 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen>
     super.dispose();
   }
 
-  Color _statusColor(String s) {
+  /// Silent sync from Google Sheets (no loading dialog)
+  Future<void> _silentSyncFromGoogleSheets() async {
+    if (!GoogleSheetsService.isConfigured) return;
+
+    try {
+      // Fetch all orders from SheetDB
+      final statusMap = await GoogleSheetsService.fetchAllOrdersFromSheet();
+
+      if (statusMap.isEmpty) return;
+
+      // Update local Hive orders
+      final box = Hive.box<OrderModel>('orders');
+      int updatedCount = 0;
+
+      for (final entry in box.toMap().entries) {
+        final order = entry.value;
+        final remoteStatus = statusMap[order.orderId];
+
+        if (remoteStatus != null && remoteStatus != order.status) {
+          order.status = remoteStatus;
+          order.save();
+          updatedCount++;
+        }
+      }
+
+      // Show result snackbar
+      if (mounted) {
+        if (updatedCount > 0) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Synced! Updated $updatedCount order(s)'),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      // Silent fail - don't show error to user
+      print('Silent sync failed: $e');
+    }
+  }
+
+  /// Sync order statuses from Google Sheets
+  Future<void> _syncFromGoogleSheets() async {
+    if (!GoogleSheetsService.isConfigured) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Google Sheets not configured')),
+      );
+      return;
+    }
+
+    // Show loading dialog
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Syncing from Google Sheets...'),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    try {
+      // Fetch all orders from SheetDB
+      final statusMap = await GoogleSheetsService.fetchAllOrdersFromSheet();
+
+      if (!mounted) return;
+      Navigator.of(context).pop(); // Close loading dialog
+
+      if (statusMap.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No orders found in Google Sheets')),
+        );
+        return;
+      }
+
+      // Update local Hive orders
+      final box = Hive.box<OrderModel>('orders');
+      int updatedCount = 0;
+
+      for (final entry in box.toMap().entries) {
+        final order = entry.value;
+        final remoteStatus = statusMap[order.orderId];
+
+        if (remoteStatus != null && remoteStatus != order.status) {
+          order.status = remoteStatus;
+          order.save();
+          updatedCount++;
+        }
+      }
+
+      if (!mounted) return;
+      if (updatedCount > 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Synced! Updated $updatedCount order(s)'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Already up to date!')),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.of(context).pop(); // Close loading dialog
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Sync failed: $e'), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  // Static methods for status styling
+  static Color _statusColor(String s) {
     switch (s) {
       case 'completed':
         return const Color(0xFF4CAF50);
@@ -50,7 +183,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen>
     }
   }
 
-  Color _statusBg(String s) {
+  static Color _statusBg(String s) {
     switch (s) {
       case 'completed':
         return const Color(0xFFE8F5E9);
@@ -61,7 +194,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen>
     }
   }
 
-  String _statusLabel(String s) {
+  static String _statusLabel(String s) {
     switch (s) {
       case 'completed':
         return '✓  Completed';
@@ -72,7 +205,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen>
     }
   }
 
-  String _statusEmoji(String s) {
+  static String _statusEmoji(String s) {
     switch (s) {
       case 'completed':
         return '✅';
@@ -213,30 +346,34 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen>
                       );
                     }
 
-                    return ListView.builder(
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-                      itemCount: grouped.length,
-                      itemBuilder: (_, i) {
-                        final id = grouped.keys.elementAt(i);
-                        final items = grouped[id]!;
-                        final first = items.first;
-                        final total = items.fold(
-                          0.0,
-                          (s, o) => s + o.totalPrice,
-                        );
-                        return _OrderCard(
-                          id: id,
-                          items: items,
-                          first: first,
-                          total: total,
-                          statusColor: _statusColor(first.status),
-                          statusBg: _statusBg(first.status),
-                          statusLabel: _statusLabel(first.status),
-                          statusEmoji: _statusEmoji(first.status),
-                          cardIndex: i,
-                        );
-                      },
+                    return RefreshIndicator(
+                      onRefresh: _syncFromGoogleSheets,
+                      color: const Color(0xFF4CAF50),
+                      child: ListView.builder(
+                        physics: const BouncingScrollPhysics(),
+                        padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+                        itemCount: grouped.length,
+                        itemBuilder: (_, i) {
+                          final id = grouped.keys.elementAt(i);
+                          final items = grouped[id]!;
+                          final first = items.first;
+                          final total = items.fold(
+                            0.0,
+                            (s, o) => s + o.totalPrice,
+                          );
+                          return _OrderCard(
+                            id: id,
+                            items: items,
+                            first: first,
+                            total: total,
+                            statusColor: _OrderHistoryScreenState._statusColor(first.status),
+                            statusBg: _OrderHistoryScreenState._statusBg(first.status),
+                            statusLabel: _OrderHistoryScreenState._statusLabel(first.status),
+                            statusEmoji: _OrderHistoryScreenState._statusEmoji(first.status),
+                            cardIndex: i,
+                          );
+                        },
+                      ),
                     );
                   },
                 ),
@@ -531,7 +668,7 @@ class _OrderCard extends StatelessWidget {
         ),
         titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
         content: Text(
-          'Cancel order "$id"?\nThis action cannot be undone.',
+          'Cancel order "${id}"?\nThis action cannot be undone.',
           textAlign: TextAlign.center,
           style: const TextStyle(color: Colors.grey),
         ),
@@ -671,6 +808,7 @@ class _OrderCard extends StatelessWidget {
                       ],
                     ),
                   ),
+                  // Status badge
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 10,

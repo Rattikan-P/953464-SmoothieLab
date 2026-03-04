@@ -7,6 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../providers/cart_provider.dart';
 import '../models/order_model.dart';
 import '../data/ingredients_data.dart';
+import '../services/google_sheets_service.dart';
 import 'payment_success_screen.dart';
 
 class PaymentScreen extends StatefulWidget {
@@ -80,8 +81,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
         ..extrasIndexes = item.extrasIndexes
         ..veggieIndexes = item.veggieIndexes
         ..herbsIndexes = item.herbsIndexes
-        ..toppingsIndexes = toppingIndexes;
+        ..toppingsIndexes = toppingIndexes
+        ..basePrice = item.basePrice;
       await box.add(order);
+
+      // Send to Google Sheets (non-blocking, won't affect UI if it fails)
+      if (GoogleSheetsService.isConfigured) {
+        GoogleSheetsService.sendOrderToSheet(order).catchError((_) => false);
+      }
     }
   }
 

@@ -1,7 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(flutter analyze lib/screens/lab_screen.dart lib/data/ingredients_data.dart)"
+      "Bash(flutter analyze lib/screens/lab_screen.dart lib/data/ingredients_data.dart)",
+      "Bash(flutter pub get)",
+      "Bash(flutter analyze lib/screens/order_history_screen.dart)",
+      "Bash(flutter analyze lib/screens/order_history_screen.dart lib/services/google_sheets_service.dart)",
+      "Bash(flutter clean)",
+      "Bash(flutter analyze)",
+      "Bash(flutter build apk --debug)",
+      "Bash(flutter run -d chrome)"
     ]
   }
 }

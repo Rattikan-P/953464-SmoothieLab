@@ -29,9 +29,9 @@ class CartProvider extends ChangeNotifier {
   }
 
   String get discountLabel {
-    if (subtotal >= 300) return 'ลด 15% (ยอดเกิน ฿300)';
-    if (subtotal >= 200) return 'ลด 10% (ยอดเกิน ฿200)';
-    if (subtotal >= 100) return 'ลด 5% (ยอดเกิน ฿100)';
+    if (subtotal >= 300) return '15% off (orders over ฿300)';
+    if (subtotal >= 200) return '10% off (orders over ฿200)';
+    if (subtotal >= 100) return '5% off (orders over ฿100)';
     return '';
   }
 

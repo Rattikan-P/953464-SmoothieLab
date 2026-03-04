@@ -48,7 +48,9 @@ class SmoothieLabLogo extends StatelessWidget {
 
 // ── Preset data ───────────────────────────────────────
 // Popular recipes (items with badges)
-final List<SmoothieItem> _popularItems = kMenuItems.where((item) => item.badge != null).toList();
+final List<SmoothieItem> _popularItems = kMenuItems
+    .where((item) => item.badge != null)
+    .toList();
 
 // ── Home Screen ───────────────────────────────────────
 class HomeScreen extends StatefulWidget {
@@ -102,7 +104,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         herbs.add(i);
       }
     }
-
 
     context.read<NavigationProvider>().goToLabWithPreset(
       fruits,
@@ -585,9 +586,19 @@ class _FormulaBannerState extends State<_FormulaBanner>
     return GestureDetector(
       onTap: () {
         HapticFeedback.mediumImpact();
-        context.read<NavigationProvider>().goToLabWithPreset([
-          1,
-        ], menuName: 'Mango Tango');
+        final item = kMenuItems.firstWhere((m) => m.name == 'Mango Tango');
+        context.read<NavigationProvider>().goToLabWithPreset(
+          item.fruitIndexes.where((i) => i < 30).toList(),
+          extrasIndexes: item.fruitIndexes
+              .where((i) => i >= 30 && i < 100)
+              .toList(),
+          veggieIndexes: item.fruitIndexes
+              .where((i) => i >= 100 && i < 260)
+              .toList(),
+          herbsIndexes: item.fruitIndexes.where((i) => i >= 260).toList(),
+          menuName: item.name,
+          menuEmoji: item.emoji,
+        );
       },
       child: ClipRRect(
         borderRadius: BorderRadius.circular(28),
@@ -782,7 +793,8 @@ class _FormulaBannerState extends State<_FormulaBanner>
                       builder: (_, child) =>
                           Transform.scale(scale: _pop.value, child: child),
                       child: SmoothieCupWidget(
-                        cupColor: kIngredientColors[1] ?? const Color(0xFFFFB347),
+                        cupColor:
+                            kIngredientColors[1] ?? const Color(0xFFFFB347),
                         fruits: ['🥭', '🍍', '🍋'],
                         size: 112,
                       ),

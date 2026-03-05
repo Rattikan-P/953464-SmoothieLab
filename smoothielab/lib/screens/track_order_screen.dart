@@ -4,6 +4,7 @@ import '../models/order_model.dart';
 import '../widgets/smoothie_cup_widget.dart';
 import '../data/ingredients_data.dart';
 import '../models/smoothie_item.dart';
+import '../services/google_sheets_service.dart';
 
 class TrackOrderScreen extends StatefulWidget {
   final String orderId;
@@ -221,12 +222,21 @@ class _TrackOrderScreenState extends State<TrackOrderScreen>
       final box = Hive.box<OrderModel>('orders');
       for (final entry in box.toMap().entries) {
         if (entry.value.orderId == widget.orderId) {
+          // Update local Hive
           entry.value.status = 'cancelled';
-          entry.value.save();
+          await entry.value.save();
+
+          // Sync to Google Sheets
+          if (GoogleSheetsService.isConfigured) {
+            GoogleSheetsService.sendOrderToSheet(entry.value)
+                .catchError((_) => false);
+          }
         }
       }
       // กลับหน้าก่อนหน้าหลังยกเลิกสำเร็จ
-      Navigator.pop(context);
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
     }
   }
 

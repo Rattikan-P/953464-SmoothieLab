@@ -721,8 +721,15 @@ class _OrderCard extends StatelessWidget {
       final box = Hive.box<OrderModel>('orders');
       for (final entry in box.toMap().entries) {
         if (entry.value.orderId == id) {
+          // Update local Hive
           entry.value.status = 'cancelled';
-          entry.value.save();
+          await entry.value.save();
+
+          // Sync to Google Sheets
+          if (GoogleSheetsService.isConfigured) {
+            GoogleSheetsService.sendOrderToSheet(entry.value)
+                .catchError((_) => false);
+          }
         }
       }
     }

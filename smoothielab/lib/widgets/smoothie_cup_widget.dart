@@ -5,6 +5,7 @@ import '../data/ingredients_data.dart';
 class SmoothieCupWidget extends StatefulWidget {
   final Color cupColor;
   final List<String> fruits;
+
   final double size;
 
   /// Constructor แบบดั้งเดิม - ใส่สีและ emoji เอง
@@ -44,6 +45,7 @@ class SmoothieCupWidget extends StatefulWidget {
       fruits: fruits,
       size: size,
     );
+
   }
 
   /// คำนวณสี blend จาก ingredient indexes
@@ -178,7 +180,7 @@ class _SmoothieCupWidgetState extends State<SmoothieCupWidget>
             painter: _SmoothieCupPainter(
               cupColor: widget.cupColor,
               fruits: widget.fruits,
-              t: _ctrl.value,
+              t: _ctrl.value, // t = time, _crtl.value goes from 0.0 to 1.0 repeatedly
             ),
           );
         },

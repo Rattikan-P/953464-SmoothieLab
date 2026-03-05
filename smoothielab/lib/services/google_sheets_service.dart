@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/order_model.dart';
+import '../data/ingredients_data.dart';
 
 class GoogleSheetsService {
   // Use SheetDB instead (easier, no CORS issues!)
@@ -23,6 +24,44 @@ class GoogleSheetsService {
   static bool get isConfigured =>
       (_sheetDbUrl != null && _sheetDbUrl!.isNotEmpty) ||
       (_scriptUrl != null && _scriptUrl!.isNotEmpty);
+
+  /// Build complete ingredient list from all indexes
+  static String _buildIngredientList(OrderModel order) {
+    final names = <String>[];
+
+    // Fruits
+    for (final i in order.fruitIndexes) {
+      if (i >= 0 && i < kFruitsData.length) {
+        names.add(kFruitsData[i].$2);
+      }
+    }
+
+    // Extras (offset 30)
+    for (final i in order.extrasIndexes) {
+      final adjustedIndex = i - 30;
+      if (adjustedIndex >= 0 && adjustedIndex < kExtrasData.length) {
+        names.add(kExtrasData[adjustedIndex].$2);
+      }
+    }
+
+    // Veggies (offset 100)
+    for (final i in order.veggieIndexes) {
+      final adjustedIndex = i - 100;
+      if (adjustedIndex >= 0 && adjustedIndex < kVeggiesData.length) {
+        names.add(kVeggiesData[adjustedIndex].$2);
+      }
+    }
+
+    // Herbs (offset 260)
+    for (final i in order.herbsIndexes) {
+      final adjustedIndex = i - 260;
+      if (adjustedIndex >= 0 && adjustedIndex < kHerbsData.length) {
+        names.add(kHerbsData[adjustedIndex].$2);
+      }
+    }
+
+    return names.isEmpty ? 'Custom Smoothie' : names.join(', ');
+  }
 
   /// Send order data to Google Sheets
   static Future<bool> sendOrderToSheet(OrderModel order) async {
@@ -49,7 +88,7 @@ class GoogleSheetsService {
         'size': order.size,
         'sweetness': order.sweetness,
         'toppings': order.toppings.join(', '),
-        'ingredients': order.ingredients.join(', '),
+        'ingredients': _buildIngredientList(order),
         'total_price': order.totalPrice.toString(),
         'status': order.status,
         'created_at': DateTime.now().toIso8601String(),
@@ -90,7 +129,7 @@ class GoogleSheetsService {
         'totalPrice': order.totalPrice.toString(),
         'status': order.status,
         'toppings': order.toppings.join(', '),
-        'ingredients': order.ingredients.join(', '),
+        'ingredients': _buildIngredientList(order),
       };
 
       final response = await http.post(

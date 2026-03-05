@@ -1,7 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-import 'dart:async';
+import 'package:promptpay_qrcode_generate/promptpay_qrcode_generate.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../providers/cart_provider.dart';
@@ -17,7 +17,7 @@ class PaymentScreen extends StatefulWidget {
 }
 
 class _PaymentScreenState extends State<PaymentScreen> {
-  int _seconds = 10;
+  int _seconds = 300;
   Timer? _timer;
   bool _expired = false;
 
@@ -152,6 +152,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
   Widget build(BuildContext context) {
     final cart = context.watch<CartProvider>();
     final total = cart.total;
+    // Round total to nearest integer for display and QR code
+    final roundedAmount = total.round();
     final isAlmostExpired = _seconds <= 60;
 
     return Scaffold(
@@ -182,13 +184,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     style: const TextStyle(color: Colors.black),
                     children: [
                       TextSpan(
-                        text: '฿${total.toStringAsFixed(0)}',
+                        text: '฿$roundedAmount',
                         style: const TextStyle(
                             fontSize: 52, fontWeight: FontWeight.bold),
                       ),
                       const TextSpan(
                         text: '.00',
-                        style: TextStyle(fontSize: 24, color: Colors.grey),
+                        style: TextStyle(
+                            fontSize: 32, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -241,36 +244,37 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             0, 0, 1, 0, 0,
                             0, 0, 0, 1, 0,
                           ]),
-                    child: QrImageView(
-                      data: 'PROMPTPAY:0812345678:${total.toStringAsFixed(2)}',
-                      version: QrVersions.auto,
-                      size: 180,
+                    child: QRCodeGenerate(
+                      promptPayId: '0987541247',
+                      amount: roundedAmount.toDouble(),
+                      width: 250,
+                      height: 250,
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 14, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF3949AB).withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.qr_code_rounded,
-                          size: 14, color: Color(0xFF3949AB)),
-                      SizedBox(width: 6),
-                      Text('PromptPay',
-                          style: TextStyle(
-                              color: Color(0xFF3949AB),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12)),
-                    ],
-                  ),
-                ),
+                // const SizedBox(height: 16),
+                // Container(
+                //   padding: const EdgeInsets.symmetric(
+                //       horizontal: 14, vertical: 6),
+                //   decoration: BoxDecoration(
+                //     color: const Color(0xFF3949AB).withOpacity(0.1),
+                //     borderRadius: BorderRadius.circular(20),
+                //   ),
+                //   child: const Row(
+                //     mainAxisSize: MainAxisSize.min,
+                //     children: [
+                //       Icon(Icons.qr_code_rounded,
+                //           size: 14, color: Color(0xFF3949AB)),
+                //       SizedBox(width: 6),
+                //       Text('PromptPay',
+                //           style: TextStyle(
+                //               color: Color(0xFF3949AB),
+                //               fontWeight: FontWeight.bold,
+                //               fontSize: 12)),
+                //     ],
+                //   ),
+                // ),
               ]),
             ),
 
